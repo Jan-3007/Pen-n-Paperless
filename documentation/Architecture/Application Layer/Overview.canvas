@@ -1,0 +1,27 @@
+{
+	"nodes":[
+		{"id":"ec9df30929e17854","type":"text","text":"Character class","x":-150,"y":-620,"width":250,"height":60},
+		{"id":"ad8804827095b570","type":"text","text":"Ability class","x":-440,"y":-200,"width":250,"height":60},
+		{"id":"aef08dd19efee8e2","type":"text","text":"Profession class","x":420,"y":-720,"width":250,"height":60},
+		{"id":"bc1a8c725d0f13aa","type":"text","text":"Tribe class","x":420,"y":-800,"width":250,"height":60},
+		{"id":"8067815e828014be","type":"text","text":"Specialization class","x":420,"y":-650,"width":250,"height":60},
+		{"id":"d50858c344f554a8","type":"text","text":"Weaponry class","x":420,"y":-540,"width":250,"height":60},
+		{"id":"c08946b5fb559ec5","type":"text","text":"Armoury class","x":420,"y":-460,"width":250,"height":60},
+		{"id":"7570645074ad9ac0","type":"text","text":"history class","x":0,"y":-200,"width":250,"height":60},
+		{"id":"69f216825eb66038","x":-125,"y":-20,"width":250,"height":60,"type":"text","text":"HP history"},
+		{"id":"f0a6ae16b3526dc7","x":200,"y":-20,"width":250,"height":60,"type":"text","text":"XP history"},
+		{"id":"1064d5a383b61798","type":"text","text":"Statistics class","x":480,"y":-200,"width":250,"height":60}
+	],
+	"edges":[
+		{"id":"c3374da583ec20e7","fromNode":"ec9df30929e17854","fromSide":"bottom","toNode":"ad8804827095b570","toSide":"top"},
+		{"id":"7a8667f4acee360b","fromNode":"ec9df30929e17854","fromSide":"bottom","toNode":"7570645074ad9ac0","toSide":"top"},
+		{"id":"2509d42010922438","fromNode":"ec9df30929e17854","fromSide":"bottom","toNode":"1064d5a383b61798","toSide":"top"},
+		{"id":"794fa760fa1d34b1","fromNode":"d50858c344f554a8","fromSide":"left","toNode":"ec9df30929e17854","toSide":"right"},
+		{"id":"2a0f34abc6263ef8","fromNode":"c08946b5fb559ec5","fromSide":"left","toNode":"ec9df30929e17854","toSide":"right"},
+		{"id":"5365e60ee0329058","fromNode":"8067815e828014be","fromSide":"left","toNode":"ec9df30929e17854","toSide":"right"},
+		{"id":"c88de40b0490177f","fromNode":"aef08dd19efee8e2","fromSide":"left","toNode":"ec9df30929e17854","toSide":"right"},
+		{"id":"62d85cabc04868ea","fromNode":"bc1a8c725d0f13aa","fromSide":"left","toNode":"ec9df30929e17854","toSide":"right"},
+		{"id":"a7ab6fb5a900a34d","fromNode":"7570645074ad9ac0","fromSide":"bottom","toNode":"69f216825eb66038","toSide":"top"},
+		{"id":"07dc3084accbe063","fromNode":"7570645074ad9ac0","fromSide":"bottom","toNode":"f0a6ae16b3526dc7","toSide":"top"}
+	]
+}

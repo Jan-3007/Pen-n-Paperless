@@ -1,0 +1,13 @@
+{
+	"nodes":[
+		{"id":"9eebb7d1b60391cf","type":"text","text":"JavaScript handlers","x":-980,"y":-460,"width":250,"height":60},
+		{"id":"e94c182e201e780e","type":"text","text":"Webpage","x":-980,"y":-560,"width":250,"height":60},
+		{"id":"2fc9ff079ed00d3a","type":"text","text":"Python routes","x":-980,"y":-360,"width":250,"height":60}
+	],
+	"edges":[
+		{"id":"e944179017e156f3","fromNode":"9eebb7d1b60391cf","fromSide":"bottom","toNode":"2fc9ff079ed00d3a","toSide":"top"},
+		{"id":"970664aefe096d0d","fromNode":"e94c182e201e780e","fromSide":"bottom","toNode":"9eebb7d1b60391cf","toSide":"top"},
+		{"id":"7ee9ae92516e0174","fromNode":"e94c182e201e780e","fromSide":"bottom","toNode":"9eebb7d1b60391cf","toSide":"top"},
+		{"id":"8d54df86434959c6","fromNode":"e94c182e201e780e","fromSide":"bottom","toNode":"9eebb7d1b60391cf","toSide":"top"}
+	]
+}

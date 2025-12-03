@@ -1,0 +1,11 @@
+{
+	"nodes":[
+		{"id":"3696382b26390e6b","type":"text","text":"Application Layer: Python\n\n[[Architecture/Application Layer/Overview.canvas|Overview]]","x":-380,"y":-100,"width":290,"height":220},
+		{"id":"40e8a1e6aacc2a9e","type":"text","text":"Presentation Layer: Website\n\n[[Architecture/Presentation Layer/Overview.canvas|Overview]]","x":-380,"y":-480,"width":290,"height":230},
+		{"id":"b48460b29e22d5a3","type":"text","text":"Data Layer: Database\n\n[[Architecture/Data Layer/Overview.canvas|Overview]]","x":-380,"y":240,"width":290,"height":200}
+	],
+	"edges":[
+		{"id":"4d23c042110f2fe5","fromNode":"40e8a1e6aacc2a9e","fromSide":"bottom","toNode":"3696382b26390e6b","toSide":"top"},
+		{"id":"4d797e173d313104","fromNode":"3696382b26390e6b","fromSide":"bottom","toNode":"b48460b29e22d5a3","toSide":"top"}
+	]
+}

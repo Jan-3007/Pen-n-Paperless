@@ -1,0 +1,13 @@
+[project]
+name = "pen-n-paperless"
+version = "0.1.0"
+description = "A digital manager for Pen and Paper characters."
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "flask>=2.3.0,<3",
+    "flask-sqlalchemy>=2.5.1,<3",
+    "pillow>=9.0.0",
+    "python-dotenv>=0.21.0",
+    "sqlalchemy>=1.4,<2",
+]

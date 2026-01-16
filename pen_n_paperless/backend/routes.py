@@ -66,3 +66,59 @@ def main():
         characters = characters
     )
 
+
+# done for now
+@app.route('/login', methods=['POST'])
+def login_or_create():
+    """(route) in-between page: for logging in and creating new characters
+
+    Login happens by creating a form with an invisible input field with the parameters:
+        - name = "name"
+        - value = "<character_name>"
+    This form also includes a submit button for the user to initiate the login.
+
+    Character creation is enabled by creating a form with a text input (text is default type) with the parameters:
+        - name = "name"
+        - no default value
+    In order for the user to initiate the creation and login process, the form includes a submit button as well.
+    """
+
+    if request.method == 'POST':
+        
+        # get string from text input or value from hidden input
+        name = request.form.get("name", "").strip()
+
+        if name is "":
+            logging.error(f'Error, character name cannot be empty.')
+            flash('Please provide a character name', 'error')
+            return redirect(url_for('main'))
+        
+        existing = get_character_by_name(name)
+        if existing:
+            # create new session with the existing character
+            session[Generic.ID] = existing.id
+            logging.info(f'Logged in as "{existing.name}" with ID: {existing.id}.')
+            flash(f'Logged in as {existing.name}', 'success')
+            return redirect(url_for('character_page', character_name=existing.name))
+
+        # create a new character
+        new_character = create_character(name)
+        if new_character:
+            session[Generic.ID] = new_character.id
+            logging.info(f'Created new character "{new_character.name}" with ID: {new_character.id}. Logged in.')
+            flash(f'Logged in as {new_character.name}', 'success')
+            return redirect(url_for('character_page', character_name=new_character.name))
+
+        else:
+            logging.error(f'login_or_create(): Requested character name was "{name}", not "", could not resolve name to an existing character, failed to create a new character using the name')
+            
+    else:
+        logging.error(f'login_or_create(): Unexpected request method, got: {request.method}')
+
+    logging.critical(f'login_or_create(): Unexpected behaviour, returning to the main page.')
+    flash(f'Internal error', 'error')
+    return redirect(url_for('main'))
+
+
+
+

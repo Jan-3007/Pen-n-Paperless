@@ -5,6 +5,13 @@
 .obsidian/
 docs/
 
+# Database
+.db
+
+# Avatars
+.jpg
+.webp
+
 
 # --- --- --- --- ---
 # Python

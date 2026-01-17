@@ -6,11 +6,14 @@
 docs/
 
 # Database
-.db
+*.db
 
 # Avatars
-.jpg
-.webp
+*.jpg
+*.webp
+
+# Log files
+*.log
 
 
 # --- --- --- --- ---

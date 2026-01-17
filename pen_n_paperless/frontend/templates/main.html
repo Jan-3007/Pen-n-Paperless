@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="{{language}}">
+    
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="Pen'n'Paperless">
+        <title>
+            {{world_name}}
+        </title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
+    </head>
+
+    <body>
+        <div class="container">
+
+            <header style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                <!-- main title -->
+                <div>
+                    <h1>{{world_name}}</h1>
+                    <div class="small">Welcome in a world of adventure and wonder.</div>
+                </div>
+
+                <!-- show currently logged in character if available -->
+                {% if active_character %}
+                <div style="align-items:center;">
+					<div class="avatar-wrapper">
+
+						<div style="padding-right:20px">
+							Logged in as <strong>{{ character_name }}</strong><br>
+							<form method="post" action="{{ url_for('logout') }}" class="inline">
+								<button type="submit" class="danger">Logout</button>
+							</form>
+						</div>
+
+                        {% if avatar_url %}
+						<div class="avatar-image">
+                            <picture>
+                                <img src="{{ avatar_url }}" alt="avatar" class="avatar">
+                            </picture>
+						</div>
+                        {% endif %}
+					</div>
+                </div>
+                {% endif %}
+            </header>
+
+            <!-- import javascript -->
+            {% set flashed = get_flashed_messages(with_categories=True) %}
+			<script id="flashed-data" type="application/json">{{ flashed|tojson }}</script>
+
+            <!-- card containing all available characters and their avatars-->
+            <div class="card">
+                <h2>Characters</h2>
+                
+                {% if character_dict %}
+                <div class="grid" style="width: max-content;">
+
+                    {% for ch_name, ch_url in characters.items() %}
+                    <div class="card">
+                        <div class="avatar-wrapper">
+
+                            <div>
+                                {{ ch_name }}
+                                <br>
+                                <form method="post" action="{{ url_for('login_or_create')}}" class="inline">
+                                    <input type="hidden" name="name" value="{{ ch_name }}">
+                                    <button type="submit" class="login">Login</button>
+                                </form>
+                            </div>
+
+                            {% if ch_url %}
+                            <div class="avatar-image">
+                                <picture>
+                                    <img src="{{ ch_url }}" alt="avatar" class="avatar">
+                                </picture>
+                            </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                </div>
+                {% else %}
+                <div class="small">No characters have been created yet.</div>
+                {% endif %}
+            </div>
+
+            <!-- card for creating a new character -->
+            <div class="card" style="margin-top: 12px;">
+                <h3>Create a new character</h3>
+
+                <form method="post" action="{{ url_for('login_or_create') }}" class="inline">
+                    <label for="name"></label>
+                    <input type="text" id="name" name="name" required placeholder="Character name">
+                    <button type="submit" style="margin-top: 5px;">Create</button>
+                </form>
+            </div>
+
+        </div>
+
+        <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+    </body>
+
+</html>

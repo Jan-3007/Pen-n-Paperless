@@ -1,0 +1,76 @@
+/* Forms, controls and components */
+
+/* label{display:block; margin-bottom:6px} */
+input[type=text], input[type=file], textarea{width:100%; padding:8px; border:1px solid #e5e7eb; border-radius:6px}
+.controls{display:flex; gap:8px; align-items:center}
+
+.stat{display:flex; gap:8px; align-items:center; justify-content:space-between; padding:8px 0}
+.stat strong{min-width:120px}
+
+
+
+/* buttons */
+button{
+    color:#111827; 
+    border:none; 
+    padding:8px 10px; 
+    border-radius:6px; 
+    cursor:pointer
+}
+button.danger{
+    color:#b91c1c;
+    /* margin-top: 5px;
+    margin-bottom: 5px; */
+}
+button.save{
+    background:var(--accent); 
+}
+button.login{
+    background: var(--accent);
+}
+
+button.add{
+    background: lightgreen;
+    margin: 2px;
+    padding: 6px 8px;
+}
+button.subtract{
+    background:  rgb(255, 129, 83);
+    margin: 2px;
+    padding: 6px 8px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* dropdown/select styling for armour selector */
+select.armour-select{width:220px; padding:8px; border:1px solid #e5e7eb; border-radius:6px; background:white}
+select.armour-select:focus{outline:2px solid rgba(59,130,246,0.3)}
+/* armour description under selector */
+.armour-desc{margin-top:6px; font-size:0.9rem; color:var(--muted)}
+
+/* checkbox list for armour selector */
+.armour-list{display:flex; flex-direction:column; gap:6px}
+.armour-item{display:flex; align-items:center; gap:6px}
+.armour-item input[type=checkbox]{width:16px; height:16px}
+
+
+/* utilities */
+.muted{color:var(--muted)}
+.notes{margin-top:10px}
+
+
+
+
+

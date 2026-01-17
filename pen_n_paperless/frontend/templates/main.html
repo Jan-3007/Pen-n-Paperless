@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="Pen'n'Paperless">
         <title>
-            {{world_name}}
+            {{ world_name }}
         </title>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
     </head>
@@ -17,8 +17,8 @@
             <header style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
                 <!-- main title -->
                 <div>
-                    <h1>{{world_name}}</h1>
-                    <div class="small">Welcome in a world of adventure and wonder.</div>
+                    <h1>{{ world_name }}</h1>
+                    <div class="small">Welcome to a world of adventure and wonder.</div>
                 </div>
 
                 <!-- show currently logged in character if available -->
@@ -56,7 +56,7 @@
                 {% if character_dict %}
                 <div class="grid" style="width: max-content;">
 
-                    {% for ch_name, ch_url in characters.items() %}
+                    {% for ch_name, ch_url in character_dict.items() %}
                     <div class="card">
                         <div class="avatar-wrapper">
 
@@ -89,12 +89,12 @@
 
             <!-- card for creating a new character -->
             <div class="card" style="margin-top: 12px;">
-                <h3>Create a new character</h3>
+                <h2>Create a new character</h2>
 
                 <form method="post" action="{{ url_for('login_or_create') }}" class="inline">
                     <label for="name"></label>
-                    <input type="text" id="name" name="name" required placeholder="Character name">
-                    <button type="submit" style="margin-top: 5px;">Create</button>
+                    <input type="text" id="name" name="name" required placeholder="Your character name">
+                    <button type="submit" style="margin-top: 5px; margin-left: inherit;">Create</button>
                 </form>
             </div>
 

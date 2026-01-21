@@ -27,7 +27,7 @@
 					<div class="avatar-wrapper">
 
 						<div style="padding-right:20px">
-							Logged in as <strong>{{ character_name }}</strong><br>
+							Logged in as <strong>{{ active_character.name }}</strong><br>
 							<form method="post" action="{{ url_for('logout') }}" class="inline">
 								<button type="submit" class="danger">Logout</button>
 							</form>

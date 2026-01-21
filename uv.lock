@@ -154,6 +154,9 @@ requires-dist = [
     { name = "sqlalchemy", specifier = ">=1.4,<2" },
 ]
 
+[package.metadata.requires-dev]
+dev = []
+
 [[package]]
 name = "pillow"
 version = "12.1.0"

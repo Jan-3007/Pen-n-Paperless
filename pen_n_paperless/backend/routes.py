@@ -152,3 +152,64 @@ def logout():
 
 
 
+# character pages
+
+# <character_name> is dynamically replaced with the actual character name
+# call this page with 'url_for('character_overview', character_name=name)'
+@app.route('/<string:character_name>')
+def character_overview(character_name: str):
+    """(route) Character overview page: Page after successfully logging in
+
+    When a user tries to access this page without being logged in they will be send back to main.
+    If the user tries to access a character page while being logged in as another character, they will be send back to their own page.
+    
+    :param character_name: Name of the character
+    :type character_name: str
+    """
+    
+    logging.debug(f'character_overview(): retrieving character ID from session')
+    session_char_id = get_active_character_id()
+
+    # User is not logged in as a character
+    if session_char_id == None:
+        logging.error(f'Error while trying to access page: /{character_name}. User not signed in.')
+        flash("Please sign in first", "error")
+        return redirect(url_for('main'))
+    
+    # Resolve character from ID
+    character_from_session = get_character_by_id(session_char_id)
+    if character_from_session == None:
+        logging.error(f'character_overview(): Error while resolving character ID.')
+        flash(f'Internal error.', 'error')
+        return redirect(url_for('main'))
+    
+    # User is logged in, but <character_name> does not match the name retrieved using the ID from the session
+    if character_name != character_from_session.name:
+        logging.error(f'User tried to access page of a different character whilst being logged in. \n\tCharacter from session: {character_from_session.id}, {character_from_session.name}. \n\tRequested character: "{character_name}"')
+        flash(f'Please log out first.', 'error')
+        return redirect(url_for('character_overview', character_name=character_from_session.name))
+    
+    # try to find avatar
+    avatar_url = get_avatar_path(character_from_session.id, character_from_session.name)
+
+    logging.info(f'Logging in as "{character_from_session.name}" with ID: {character_from_session.id}.')
+    flash(f'Logged in as {character_from_session.name}', 'success')
+
+    # TODO: provide lists of max_armour_sets, max_nb_weapons, ...
+    return render_template(
+        # template
+        'character.html',
+        # generic
+        language = GeneralConfig.language(),
+        # character
+        character = character_from_session,
+        avatar_url = avatar_url,
+        tribe_dict = Tribe.get_all_names(),
+        profession_dict = Profession.get_all_names(),
+        specialization_dict = Specialization.get_all_names(),
+        # Armour, Weapons
+        max_armour_sets = 1,
+        max_nb_weapons = 2
+    )
+
+

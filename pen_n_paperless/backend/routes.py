@@ -9,6 +9,7 @@ from flask import   session,\
                     request,\
                     redirect,\
                     flash
+import glob
 
 
 # internal imports
@@ -18,9 +19,9 @@ from .. import module_root_path, avatars_path
 from ..config.general import GeneralConfig
 from ..common.keys import Generic
 
-from .characters.characters import *
+from pen_n_paperless.backend.characters import *
 
-
+from pen_n_paperless.content import *
 
 
 # done for now

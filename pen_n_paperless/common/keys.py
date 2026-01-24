@@ -89,8 +89,24 @@ class Abilities(Key):
     MAX_ABILITY_POINTS = auto()
     REMAINING_ABILITY_POINTS = auto()
 
+    ACROBATICS = auto()
+    SNEAKING = auto()
 
-    
+
+# Tribe keys
+class Tribes(Key):
+    ELF = auto()
+    GNOME = auto()
+    HALFELF = auto()
+    HALFLING = auto()
+    HALFORC = auto()
+    HUMAN = auto()
+    DWARF = auto()
+
+
+
+
+
 
 # Profession keys
 class Professions(Key):
@@ -105,6 +121,7 @@ class Professions(Key):
 # Spoecialization keys
 class Specializations(Key):
     SPECIALIZATION = auto()
+    EVOLUTION = auto()
 
     # Bard
     SPY = auto()
@@ -128,3 +145,24 @@ class Specializations(Key):
     GEOLOGIST = auto()
     MATHEMATICIAN = auto()
     PHARMACIST = auto()
+
+
+# Character traits keys
+class Traits(Key):
+    TRAIT = auto()
+
+    # Pickpocket - level 2
+    IMPERSONATOR = auto()
+    LOCKSMITH = auto()
+    TRAP_DIFFUSER = auto()
+    #            - level 4
+    STREET_SMARTS = auto()
+    SMUGGLER = auto()
+    FENCE_CONTACTS = auto()
+
+    # Assassin - level 2
+    NIGHTVISION = auto()
+    MINDCONTROL = auto()
+    HIDDEN_BLADE = auto()
+
+

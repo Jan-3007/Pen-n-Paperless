@@ -5,13 +5,15 @@
 import logging
 
 # internal imports
+#   main package
+from pen_n_paperless.common.keys import Professions as key
+from pen_n_paperless.common.keys import Generic, Statistics, Specializations
+
+from pen_n_paperless.common.languages import Language
+from pen_n_paperless.config.general import GeneralConfig
+
+#   this submodule
 from  ..character_properties_itf import CharacterPropertiesInterface
-
-from ...common.keys import Professions as key
-from ...common.keys import Generic, Statistics, Specializations
-
-from ...common.languages import Language
-from ...config.general import GeneralConfig
 
 
 
@@ -119,11 +121,10 @@ class Profession(CharacterPropertiesInterface):
         
         :param cls: Description
         :return: List of all available professions as keys, empty list if no professions exist
-        :rtype: list[str]
+        :rtype: list
         """
 
         return list(cls._professions.keys())
-
 
 
     @classmethod
@@ -140,17 +141,16 @@ class Profession(CharacterPropertiesInterface):
         return cls._professions.get(key, {})
 
 
-
     @classmethod
     def get_all_names(cls) -> dict:
         profession_dict = {}
 
-        for p_key in Profession.get_all():
-            properties = Profession.get_properties(p_key)
+        for p_key in cls.get_all():
+            properties = cls.get_properties(p_key)
             name_dict = properties.get(Generic.NAME, {})
 
             if name_dict == {}:
-                logging.warning(f"get_all_names(): get_all() returned the key {p_key}, but get_properties() did not include a value for key{Generic.NAME}")
+                logging.warning(f"get_all_names(): get_all() returned the key {p_key}, but get_properties() did not include a value for key {Generic.NAME}")
                 profession_dict[Generic.NONE] = "No profession found"
             else:
                 # add entry to dict with profession key and its display name

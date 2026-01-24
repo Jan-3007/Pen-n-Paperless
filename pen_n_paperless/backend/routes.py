@@ -213,3 +213,63 @@ def character_overview(character_name: str):
     )
 
 
+
+# character subpages
+
+# call this page with 'url_for('editor', character_name=name)'
+@app.route('/<string:character_name>/editor')
+def editor(character_name: str):
+    """(route) Character editor page
+
+    When a user tries to access this page without being logged in they will be send back to main.
+    If the user tries to access a character page while being logged in as another character, they will be send back to their own page.
+    
+    :param character_name: Name of the character
+    :type character_name: str
+    """
+
+    logging.debug(f'character_overview(): retrieving character ID from session')
+    session_char_id = get_active_character_id()
+
+    # User is not logged in as a character
+    if session_char_id == None:
+        logging.error(f'Error while trying to access page: /{character_name}/editor. User not signed in accordingly.')
+        flash("Please sign in first", "error")
+        return redirect(url_for('main'))
+
+    # Resolve character from ID
+    character_from_session = get_character_by_id(session_char_id)
+    if character_from_session == None:
+        logging.error(f'editor(): Error while resolving character ID.')
+        flash(f'Internal error.', 'error')
+        return redirect(url_for('main'))
+    
+    # User is logged in, but <character_name> does not match the name retrieved using the ID from the session, not allowed
+    if character_name != character_from_session.name:
+        logging.error(f'User tried to access a character page whilst being logged in as another character. \n\tCharacter ID from session: {character_from_session.id}. \n\tRequested character: "{character_name}"')
+        flash(f'Please log out first.', 'error')
+        return redirect(url_for('character_overview', character_name=character_from_session.name))
+    
+    # try to find avatar file
+    avatar_url = get_avatar_path(character_from_session.id, character_from_session.name)
+
+    logging.info(f"Character {character_from_session.name} is accessing its editor.")
+
+    # TODO: provide lists of max_armour_sets, max_nb_weapons, ...
+    return render_template(
+        # template
+        'character_editor.html',
+        # generic
+        # character
+        character=character_from_session,
+        avatar_url=avatar_url,
+        tribe_dict = Tribe.get_all_names(),
+        profession_dict = Profession.get_all_names(),
+        specialization_dict = Specialization.get_all_names(),
+    )
+
+
+
+
+
+

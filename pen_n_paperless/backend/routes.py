@@ -35,36 +35,42 @@ def main():
     Page includes a form to create a new character.
     """
 
-    character_id = get_active_character_id()
+    session_char_id = get_active_character_id()
     active_character = None
     avatar_url = None
 
     # show the active character on the main page, skip if none can be found
-    if character_id:
-        active_character = get_character_by_id(character_id=character_id)
+    if session_char_id:
+        active_character = get_character_by_id(character_id=session_char_id)
         if active_character:
             logging.info(f'"{active_character.name}" already logged in.')
         
             # try to find avatar file
-            avatar_url = get_avatar_path(character_id, active_character.name)
+            avatar_url = get_avatar_path(session_char_id, active_character.name)
         else:
-            logging.error(f"Found ID '{character_id}' in session, but no associated character found in database.")
+            logging.error(f"Found ID '{session_char_id}' in session, but no associated character found in database.")
             flash("Internal error", "error")
 
     # get all available characters for the main page
     characters = get_all_characters()
+
+    # get avatar path for each character
+    character_dict = {}
+    for ch in characters:
+        character_dict[ch.name] = get_avatar_path(ch.id, ch.name)
 
     # render main page
     return render_template(
         # template
         'main.html',
         # generic
-        world_name = GeneralConfig.world_name,
+        language = GeneralConfig.language(),
+        world_name = GeneralConfig.world_name(),
         # active character
         active_character = active_character,
         avatar_url = avatar_url,
         # all characters
-        characters = characters
+        character_dict = character_dict
     )
 
 

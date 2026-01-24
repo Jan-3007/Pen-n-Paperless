@@ -3,13 +3,20 @@
 
 # Python module imports
 import logging
-from sqlalchemy.orm import  Mapped 
 from typing import List
 
+from sqlalchemy.ext.mutable import MutableList
+from sqlalchemy import Enum
+
+
+
 # internal imports
-from ... import db
+from pen_n_paperless import db
 
-
+from pen_n_paperless.common.keys import get_enum_values,\
+                                        Tribes, \
+                                        Professions, \
+                                        Specializations
 
 
 
@@ -23,6 +30,38 @@ class Character(db.Model):
     _id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     _name = db.Column(db.String(100), default="")
 
+    # Tribe, Profession and Specialization
+    _tribe = db.Column(Enum(Tribes, values_callable=get_enum_values), nullable=True, default=None)
+    _profession = db.Column(Enum(Professions, values_callable=get_enum_values), nullable=True, default=None)
+    _specialization = db.Column(Enum(Specializations, values_callable=get_enum_values), nullable=True, default=None)
+
+    # Statistics
+    _level = db.Column(db.Integer, default=1)
+    _max_hp = db.Column(db.Integer, default=100)
+
+    # Attributes
+    # TODO: Attributes instance
+
+    # Abilities
+    # TODO: Abilities instance
+
+    # Armour
+    _defense_bonus = db.Column(db.Integer, default=0)
+    _equipped_armour = db.Column(MutableList.as_mutable(db.PickleType), default=list)
+
+    # Weapons
+    _equipped_weapons = db.Column(MutableList.as_mutable(db.PickleType), default=list)
+
+    # Notes
+    _notes = db.Column(db.Text, default='')
+
+    # XP history
+    # TODO: XP history instance
+
+    # HP history
+    # TODO: HP history instance
+
+
 
     def __init__(self, display_name: str):
         self._name = display_name
@@ -31,6 +70,9 @@ class Character(db.Model):
     def __str__(self) -> str:
         return f"Hi. My name is {self._name}."
     
+
+
+# -------------------------------------------------------------------------------
 
     # Properties
     @property
@@ -46,8 +88,59 @@ class Character(db.Model):
     #     db.session.commit()
     #     return
     
+    # Tribe, Profession and Specialization
+    @property
+    def tribe(self) -> Tribes:
+        # conversion from str back to Tribes is handled by SQLAlchemy
+        return self._tribe
+    @property
+    def profession(self) -> Professions:
+        return self._profession
+    @property
+    def specialization(self) -> Specializations:
+        return self._specialization
+
+    # Statistics
+    @property
+    def level(self) -> int:
+        return self._level
+    @property
+    def max_hp(self) -> int:
+        return self._max_hp
+    @property
+    def current_hp(self) -> int:
+        # get from HP history instance
+        return -1
+    @property
+    def experience(self) -> int:
+        # get from XP history instance
+        return -1
+
+    # Attributes
 
 
+    # Abilities
+
+    # Armour
+    @property
+    def defense_bonus(self) -> int:
+        return self._defense_bonus
+    @property
+    def equipped_arrmour(self) -> list:
+        return self._equipped_armour
+    
+    # Weapons
+    @property
+    def equipped_weapons(self) -> list:
+        return self._equipped_weapons
+    
+    # Notes
+    @property
+    def notes(self) -> str:
+        return self._notes
+
+
+# -------------------------------------------------------------------------------
 
 # global helper functions
 def get_character_by_name(name: str) -> Character | None:

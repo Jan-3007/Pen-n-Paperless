@@ -18,6 +18,18 @@ class Key(Enum):
     
     
 
+def get_enum_values(enum_class):
+    """
+    Helper method in order to be able to use enums in the database
+    
+    :param enum_class: Description
+    """
+    return [member.value for member in enum_class]
+
+
+
+
+
 # Generic keys
 class Generic(Key):
     ID = auto()

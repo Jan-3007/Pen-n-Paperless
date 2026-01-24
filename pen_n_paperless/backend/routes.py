@@ -126,5 +126,29 @@ def login_or_create():
     return redirect(url_for('main'))
 
 
+# done for now
+# call this page with 'url_for('logout')'
+@app.route('/logout')
+def logout():
+    """(route) in-between page: for logging out
+
+    Logout will happen by simply removing the character ID from the users session if it is available.
+    After removing it, the user will be redirected back to the main page.
+    """
+
+    id = session.pop(Generic.ID.value, None)
+
+    char_id = session.get(Generic.ID.value, None)
+    if char_id is not None:
+        logging.error(f'logout(): Error while logging out. Failed to remove character ID from session. \n\tCharacter ID: {char_id}.')
+        flash(f'Internal error.', 'error')
+        return redirect(url_for('main'))
+    
+    logging.info(f'User with character ID "{id}" has logged out.')
+    flash('Logged out', 'success')
+
+    return redirect(url_for('main'))
+
+
 
 

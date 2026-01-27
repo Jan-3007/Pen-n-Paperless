@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>{{ character.name }} — Editor</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+	</head>
+
+	<body>
+		<div class="container">
+			<div class="card">
+				<header style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+					<div style="display:flex; align-items:center; gap:12px;">
+						<h1>Character editor</h1>
+						{% if avatar_url_webp or avatar_url %}
+							<picture>
+								{% if avatar_url_webp %}
+									<source srcset="{{ avatar_url_webp }}" type="image/webp">
+								{% endif %}
+								<img src="{{ avatar_url or avatar_url_webp }}" alt="avatar" class="avatar">
+							</picture>
+						{% endif %}
+					</div>
+
+					<div>
+						<form method="post" action="{{ url_for('logout') }}" style="display:inline">
+							<button class="secondary danger">Logout</button>
+						</form>
+					</div>
+				</header>
+			
+				{% set flashed = get_flashed_messages(with_categories=True) %}
+				<script id="flashed-data" type="application/json">{{ flashed|tojson }}</script>
+
+				<div style="margin-top:12px">
+					<h3>Upload avatar</h3>
+					<form id="avatar-form" method="post" action="{{ url_for('upload_avatar') }}" enctype="multipart/form-data">
+						<label for="avatar">Choose an image (png, jpg, gif)</label>
+						<input id="avatar" name="avatar" type="file" accept="image/*">
+						<button type="submit">Upload</button>
+					</form>
+					<button id="delete-avatar" type="button" class="link-button danger" style="margin-left:8px">Delete avatar</button>
+				</div>
+
+				<div class="grid">
+					<div class="card">
+						<strong>Tribe:</strong>
+						<span id="tribe">{{ character.tribe }}</span>
+					</div>
+					<div class="card">
+						<strong>Profession:</strong>
+						<span id="profession">{{ character.profession }}</span>
+					</div>
+					<div class="card">
+						<strong>Specialization:</strong>
+						<span id="speciality">{{ character.specialization }}</span>
+					</div>
+				</div>
+				<h2>Character Statistics</h2>
+				<div class="grid">
+					<div class="card">
+							<table class="tables">
+								<thead>
+									<tr>
+										<th>Attribute</th>
+										<th>Value</th>
+										<th>Bonus</th>
+									</tr>
+								</thead>
+								<tbody
+									<tr>
+										<td>Endurance</td>
+										<td>{{ character.attributes[Strings.endurance.value] }}</td>
+										<td>{{ character.attribute_bonuses[Strings.endurance_bonus.value] }}</td>
+									</tr>
+									<tr>
+										<td>Strength</td>
+										<td>{{ character.attributes[Strings.strength.value] }}</td>
+										<td>{{ character.attribute_bonuses[Strings.strength_bonus.value] }}</td>
+									</tr>
+									<tr>
+										<td>Dexterity</td>
+										<td>{{ character.attributes[Strings.dexterity.value] }}</td>
+										<td>{{ character.attribute_bonuses[Strings.dexterity_bonus.value] }}</td>
+									</tr>
+									<tr>
+										<td>Intelligence</td>
+										<td>{{ character.attributes[Strings.intelligence.value] }}</td>
+										<td>{{ character.attribute_bonuses[Strings.intelligence_bonus.value] }}</td>
+									</tr>
+									<tr>
+										<td>Charisma</td>
+										<td>{{ character.attributes[Strings.charisma.value] }}</td>
+										<td>{{ character.attribute_bonuses[Strings.charisma_bonus.value] }}</td>
+									</tr>
+								</tbody>
+								<tfoot>
+									<tr>
+										<th>Total</th>
+										<th>{{ character.attributes[Strings.used_attribute_points.value] }}</th>
+										<th></th>
+									</tr>
+								</tfoot>
+							</table>
+					</div>
+					<div class="card">
+							<table class="tables">
+								<tbody>
+									<tr>
+										<td>Max HP</td>
+										<td>{{ character.statistics[Strings.max_hp.value] }}</td>
+										<td></td>
+									</tr>
+									{% for hp in character.hp_history %}
+										<tr>
+											<td></td>
+											<td>{{ hp.get_properties()[Strings.val.value] }}</td>
+											<td>{{ hp.get_properties()[Strings.timestamp.value] }}</td>
+										</tr>
+									{% endfor %}
+									<tr>
+										<td>Current HP</td>
+										<td>{{ character.statistics[Strings.Statistics.hp.value] }}</td>
+										<td></td>
+									</tr>
+								</tbody>
+							</table>
+					</div>
+					<div class="card">
+						<div class="stat"><strong>Armor</strong>
+							<div class="controls">
+								<select id="armor-select" class="armour-select" multiple size="4">
+									<option value="">-- choose armour --</option>
+									{% for a in armour_list %}
+										<option value="{{ a['name'] }}" data-desc="{{ a['description'] }}" data-defense="{{ a['defense'] }}" data-weight="{{ a['weight'] }}" {% if a['name'] in character.armour %}selected{% endif %}>{{ a['name'] }}</option>
+									{% endfor %}
+								</select>
+								<div id="armour-desc" class="armour-desc muted small" style="margin-left:8px">Select armour to see description</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+<!--				<div id="stats">
+					<div class="stat"><strong>Level</strong>
+						<div class="controls"><span id="level">{{ stats.level }}</span>
+							<button onclick="chg('level',1)">+1</button>
+							<button class="secondary" onclick="chg('level',-1)">-1</button>
+						</div>
+					</div>
+					<div class="stat"><strong>XP</strong>
+						<div class="controls"><span id="experience">{{ stats.experience }}</span>
+							<button onclick="chg('experience',10)">+10</button>
+							<button class="secondary" onclick="chg('experience',-10)">-10</button>
+						</div>
+					</div>
+					<div class="stat"><strong>HP</strong>
+						<div class="controls"><span id="hp">{{ stats.hp }}</span>
+							<button onclick="chg('hp',1)">+1</button>
+							<button class="secondary" onclick="chg('hp',-1)">-1</button>
+						</div>
+					</div>
+					<div class="stat"><strong>STR</strong>
+						<div class="controls"><span id="strength">{{ stats.strength }}</span>
+							<button onclick="chg('strength',1)">+1</button>
+							<button class="secondary" onclick="chg('strength',-1)">-1</button>
+						</div>
+					</div>
+					<div class="stat"><strong>DEX</strong>
+						<div class="controls"><span id="dexterity">{{ stats.dexterity }}</span>
+							<button onclick="chg('dexterity',1)">+1</button>
+							<button class="secondary" onclick="chg('dexterity',-1)">-1</button>
+						</div>
+					</div>
+					<div class="stat"><strong>INT</strong>
+						<div class="controls"><span id="intelligence">{{ stats.intelligence }}</span>
+							<button onclick="chg('intelligence',1)">+1</button>
+							<button class="secondary" onclick="chg('intelligence',-1)">-1</button>
+						</div>
+					</div>
+				</div>-->
+				<div style="margin-top:12px">
+					<h3>Notes</h3>
+					<textarea id="notes" rows="6">{{ character.notes }}</textarea>
+					<br>
+					<button onclick="saveNotes()">Save Notes</button>
+				</div>	
+			</div>
+			<div class="card">
+				<div>
+					<h3>Danger Zone</h3>
+					<form method="post" action="{{ url_for('delete') }}" style="display:inline">
+					<button class="danger">Delete character</button>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<script>
+		
+		async function chg(key, delta){
+			const el = document.getElementById(key);
+			let val = parseInt(el.textContent)||0;
+			val += delta;
+			try{
+				const res = await fetch("{{ url_for('my_stats_update') }}", {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({[key]:val})});
+				if(res.ok){
+					const j = await res.json();
+					if(j.stats && j.stats[key] !== undefined){
+						el.textContent = j.stats[key];
+						showToast('Saved', 'success');
+					}
+				}else{
+					showToast('Save failed', 'error');
+				}
+			}catch(e){
+				showToast('Network error', 'error');
+			}
+		}
+
+			async function saveNotes(){
+				const content = document.getElementById('notes').value;
+				try{
+					const j = await fetchWithFlashes(
+						"{{ url_for('update') }}",
+						{
+							method:'POST',
+							headers:{'Content-Type':'application/json'},
+							body: JSON.stringify({ notes: { value: content } })
+						}
+					);
+
+					if(j && typeof j === 'object' && j.status === 'ok'){
+						// fetchWithFlashes already displayed server flashes; if none were returned, show a simple confirmation
+						if(!(j.flashed && j.flashed.length)) showToast('Saved','success');
+					}else{
+						showToast('Save failed','error');
+					}
+				}catch(e){
+					showToast('Network error', 'error');
+				}
+			}
+
+		</script>
+
+		<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+
+		<script>
+		// avatar upload via AJAX using fetchWithFlashes
+		(function(){
+			const form = document.getElementById('avatar-form');
+			if(form){
+				form.addEventListener('submit', async function(e){
+					e.preventDefault();
+					const fd = new FormData(form);
+					try{
+						const j = await fetchWithFlashes(form.action, {method:'POST', body: fd});
+						if(j && (j.avatar_url_webp || j.avatar_url)){
+							// prefer webp if provided, otherwise use the returned avatar_url
+							const newSrc = (j.avatar_url_webp || j.avatar_url) + '?t=' + Date.now();
+							// update all avatar images on the page
+							document.querySelectorAll('img.avatar').forEach(img => {
+								img.src = newSrc;
+							});
+						}
+					}catch(e){
+						showToast('Upload failed', 'error');
+					}
+				});
+			}
+
+			const del = document.getElementById('delete-avatar');
+			if(del){
+				del.addEventListener('click', async function(){
+					try{
+						const j = await fetchWithFlashes("{{ url_for('delete_avatar') }}", {method:'POST'});
+						if(j && j.avatar_url === null && j.avatar_url_webp === null){
+							document.querySelectorAll('img.avatar').forEach(img => img.remove());
+						}
+					}catch(e){
+						showToast('Remove failed', 'error');
+					}
+				});
+			}
+
+			// armour dropdown change handler
+			const armourSelect = document.getElementById('armor-select');
+				if(armourSelect){
+					// set initial description based on selected options
+					const descEl = document.getElementById('armour-desc');
+					const setDescFromSelected = () => {
+						const opts = Array.from(armourSelect.selectedOptions || []);
+						if(opts.length === 0){
+							descEl.textContent = 'No armour selected';
+							return;
+						}
+						const parts = opts.map(o => {
+							const d = o.dataset.desc || '';
+							const w = o.dataset.weight || '';
+							const def = o.dataset.defense || '';
+							return `${o.value}${d ? ' — ' + d : ''}${def ? ' (Def: ' + def + ')' : ''}${w ? ' [W:' + w + ']' : ''}`;
+						});
+						descEl.textContent = parts.join(' · ');
+					};
+					setDescFromSelected();
+
+					armourSelect.addEventListener('change', async function(){
+						// collect selected values (multiple)
+						const selected = Array.from(armourSelect.selectedOptions || []).map(o => o.value);
+						// update description immediately
+						setDescFromSelected();
+						try{
+							const j = await fetchWithFlashes("{{ url_for('update') }}", {
+								method:'POST',
+								headers:{'Content-Type':'application/json'},
+								body: JSON.stringify({ armour: { value: selected } })
+							});
+							// fetchWithFlashes already shows server flashes; if none, give light confirmation
+							if(j && j.status === 'ok' && !(j.flashed && j.flashed.length)) showToast('Armor updated','success');
+						}catch(e){
+							showToast('Update failed', 'error');
+						}
+					});
+				}
+		})();
+		</script>
+
+
+	</body>
+</html>

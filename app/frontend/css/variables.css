@@ -1,0 +1,11 @@
+/* Theme variables */
+:root{
+  --bg: #f6f8fa;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --accent: #51d55e;
+  --hover: #ddd;
+  --radius: 8px;
+  --max-width: 980px;
+
+}

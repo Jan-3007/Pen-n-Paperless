@@ -1,0 +1,95 @@
+{
+  "properties": 
+    {
+      "id": 1,
+      "name": "Hero",
+      "tribe": "Human",
+      "profession": "Warrior",
+      "specialization": "Swordsman"
+    },
+  
+
+  "statistics":
+    {
+      "level": 3,
+      "experience": 20,
+
+      "max_hp": 15,
+      "curret_hp": 11
+    },
+
+  "attributes": 
+    {
+      "remaining_attribute_points": 5,
+      "used_attribute_points": 30,
+      "endurance": 12,
+      "endurance_bonus": 2,
+      "strength": 10,
+      "strength_bonus": 1,
+      "dexterity": 10,
+      "dexterity_bonus": 0,
+      "intelligence": 11,
+      "intelligence_bonus": 1,
+      "charisma": 9,
+      "charisma_bonus": -1
+    },
+
+  "notes": "new",
+
+  "hp_history": [
+    {
+      "value": -12,
+      "timeout": "2024-06-15T14:30:00Z",
+      "reason": "Took damage from goblin attack"
+    },
+    {
+      "value": 10,
+      "timeout": "2024-06-10T09:15:00Z",
+      "reason": "Rested at camp"
+    }
+  ],
+
+  "armors": [
+    {
+      "name": "Leather Armor",
+      "defense_bonus": 1,
+      "equipped": true
+    }
+  ],
+
+  "weapons": [
+    {
+      "name": "Short Sword",
+      "attack_bonus": 2,
+      "damage": 5,
+      "equipped": true
+    },
+    {
+      "name": "Dagger",
+      "attack_bonus": 1,
+      "damage": 3,
+      "equipped": false
+    }
+  ],
+
+  "inventory": [
+    {
+      "name": "Health Potion",
+      "description": "Restores 5 HP when used.",
+      "quantity": 3
+    }
+  ],
+
+  "xp_history": [
+    {
+      "amount": 10,
+      "date": "2024-06-01T12:00:00Z",
+      "description": "Completed first quest"
+    },
+    {
+      "amount": 5,
+      "date": "2024-05-25T15:30:00Z",
+      "description": "Completed second quest"
+    }
+  ]
+}

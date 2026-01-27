@@ -1,0 +1,91 @@
+
+
+/* tables */
+table{
+    width: 100%; 
+    border-collapse: collapse;
+    overflow:scroll;
+}
+
+table thead{
+    border-bottom:2px solid darkgray;
+    text-align: center;
+}
+
+table td:nth-child(1n+2){
+    text-align:center
+}
+table tr:not(:last-child){
+    border-bottom:2px solid rgba(44,87,172,0.15)
+}
+table tfoot{
+    border-top:2px solid darkgray;
+}
+table.details{
+    width: 70%;
+    margin-left: 25px;
+    font-size: small;
+    color: gray;
+}
+table.details td{
+    text-align:center;
+}
+
+
+
+/* attribute table specific */
+table.attributes thead th:first-child{
+    text-align: left;
+}
+table.attributes tfoot th:first-child{
+    text-align: left;
+}
+
+
+
+
+/* history table specific */
+table.history th{
+    text-align: left;
+    width: 130px;
+    /* border-right: 1px solid black; */
+    padding-right: 0px;
+}
+
+
+table.history tbody td:last-child{
+    text-align: right;
+    width:20px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 0px;
+    /* border-left: 1px solid red; */
+}
+
+
+
+
+
+
+/* add entry table specific */
+table.add-entry{
+    margin-top: 40px;
+    /* width: 50%; */
+}
+
+table.add-entry thead th{
+    text-align: left;
+}
+
+
+
+
+/* abilities table specific */
+/* table.abilities{ */
+    /* margin-top: 40px; */
+    /* width: 50%; */
+/* } */
+
+table.abilities thead th:first-child{
+    text-align: left;
+}

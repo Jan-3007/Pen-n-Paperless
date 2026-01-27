@@ -1,0 +1,20 @@
+/* Toast notifications */
+.toast{
+    position:fixed; 
+    right:18px; 
+    bottom:18px; 
+    background:rgba(17,24,39,0.95); 
+    color:#fff; 
+    padding:10px 14px; 
+    border-radius:8px; 
+    box-shadow:0 6px 18px rgba(2,6,23,0.4); 
+    opacity:0; 
+    transform:translateY(8px); 
+    transition:opacity 220ms ease, transform 220ms ease
+}
+
+.toast.show{opacity:1; transform:translateY(0)}
+
+.toast.success{background:linear-gradient(90deg,#16a34a,#059669)}
+.toast.warning{background:linear-gradient(90deg,#e16818,#e16818)}
+.toast.error{background:linear-gradient(90deg,#dc2626,#b91c1c)}

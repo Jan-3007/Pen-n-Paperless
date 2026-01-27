@@ -1,49 +1,7 @@
-# --- --- --- --- ---
-# Pen'n'Paperless
+data/
 
-# Documentation
-.obsidian/
-docs/
-
-
-# --- --- --- --- ---
-# Python
-
-# Byte-compiled / optimized / DLL files
 __pycache__/
 
-# Distribution / packaging
-build/
-
-# Environments
 .venv/
-[Bb]in
-[Ii]nclude
-[Ll]ib
-[Ll]ib64
-[Ll]ocal
-[Ss]cripts
-pyvenv.cfg
 
-
-# --- --- --- --- ---
-# Python packages
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-
-# --- --- --- --- ---
-# Visual Studio Code
-
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/*.code-snippets
-!*.code-workspace
-
-# Built Visual Studio Code Extensions
-*.vsix
+images\

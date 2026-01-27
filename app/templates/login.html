@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Create Character</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+	</head>
+	<body>
+		<div class="container">
+			<header>
+				<h1>Create Character</h1>
+			</header>
+		{% set flashed = get_flashed_messages(with_categories=True) %}
+		<script id="flashed-data" type="application/json">{{ flashed|tojson }}</script>
+
+					<div class="card">
+						{% if characters %}
+							<h2>Existing characters</h2>
+							<div class="grid">
+								{% for c in characters %}
+									<div class="card">
+										<div>{{ c.name }}</div>
+										<form method="post" class="inline">
+											<input type="hidden" name="name" value="{{ c.name }}">
+											<button type="submit">Login</button>
+										</form>
+									</div>
+								{% endfor %}
+							</div>
+						{% endif %}
+
+						<h3 style="margin-top:12px">Create new character</h3>
+						<form method="post">
+							<label for="name">Character name</label>
+							<input id="name" name="name" required>
+							<button type="submit">Create</button>
+						</form>
+					</div>
+
+					<p style="margin-top:12px"><a href="{{ url_for('index') }}">Back</a></p>
+
+				<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+				</div>
+			</body>
+		</html>

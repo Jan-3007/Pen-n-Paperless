@@ -1,0 +1,15 @@
+[Unit]
+
+Description=Pen n Paperless
+
+
+[Service]
+
+ExecStart=/usr/bin/python3 /home/jan/test/run.py
+Environment=PYTHONUNBUFFERED=1
+Restart=always
+User=root
+
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="Character editor">
+		<title>{{ character.name }} — Editor</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+	</head>
+
+	<body data-update-url="{{ url_for('update') }}" data-delete-avatar-url="{{ url_for('delete_avatar') }}">
+		<div class="container">
+			<div class="card">
+				<header style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+					<div style="display:flex; align-items:center; gap:12px;">
+						<h1>Character editor</h1>
+					</div>
+
+					<div>
+						<form method="get" action="{{ url_for('my_character') }}" style="display:inline">
+							<button>Done</button>
+						</form>
+					</div>
+				</header>
+			
+				{% set flashed = get_flashed_messages(with_categories=True) %}
+				<script id="flashed-data" type="application/json">{{ flashed|tojson }}</script>
+
+				<hr>
+
+				<h2>Upload avatar</h2>
+
+				<div class="card">
+					<div class="avatar-wrapper">
+						
+						<div class="avatar-image">
+							{% if avatar_url_webp or avatar_url %}
+								<picture>
+									{% if avatar_url_webp %}
+										<source srcset="{{ avatar_url_webp }}" type="image/webp">
+									{% endif %}
+									<img src="{{ avatar_url or avatar_url_webp }}" alt="avatar" class="avatar avatar-image">
+								</picture>
+							{% endif %}
+						</div>
+
+						<div class="avatar-options">
+							<form id="avatar-form" method="post" action="{{ url_for('upload_avatar') }}" enctype="multipart/form-data">
+								<label for="avatar">Choose an image (png, jpg, gif)</label>
+								<input id="avatar" name="avatar" type="file" accept="image/*">
+								<!-- needs to be submit to trigger the form -->
+								<button type="submit" class="upload" style="margin-top: 20px">Upload</button>
+								<!-- must be of type button so not to trigger the from -->
+								<button type="button" class="danger" id="delete-avatar" style="margin-left:15px">Delete avatar</button>
+							</form>
+						</div>
+					</div>
+				</div>
+
+				<h2>Character Properties</h2>
+				<div class="grid">
+					
+					<div class="card">
+						<strong>Tribe:</strong><br>
+
+						<div class="dropdown" id="tribe-list">
+
+							{% if tribe_list[character.tribe] %}
+								{% set ch_tribe_name = tribe_list[character.tribe] %}
+							{% else %}			
+								{% set ch_tribe_name = 'None selected' %}
+							{% endif %}				
+
+							<button class="dropbtn" onclick="onDropdownSelect('tribe')">{{ ch_tribe_name }}</button>
+							<div class="dropdown-content" id="listDropdown-tribe">
+								{% for tribe_name in tribe_list.keys() %}
+								<button class="dropdown-element save-prop" data-key="{{ Strings.tribe.value }}" data-value="{{ tribe_name }}" data-display="{{ tribe_list[tribe_name] }}">{{ tribe_list[tribe_name] }}</button>
+								{% endfor %}
+							</div>
+						</div>
+					</div>
+	
+					<div class="card">
+						<strong>Profession:</strong><br>
+
+						<div class="dropdown" id="profession-list">
+
+							{% if profession_list[character.profession] %}
+								{% set ch_profession_name = profession_list[character.profession] %}
+							{% else %}			
+								{% set ch_profession_name = 'None selected' %}
+							{% endif %}				
+
+							<button class="dropbtn" onclick="onDropdownSelect('profession')">{{ ch_profession_name }}</button>
+							<div class="dropdown-content" id="listDropdown-profession">
+								{% for profession_name in profession_list.keys() %}
+								<button class="dropdown-element save-prop" data-key="{{ Strings.profession.value }}" data-value="{{ profession_name }}" data-display="{{ profession_list[profession_name] }}">{{ profession_list[profession_name] }}</button>
+								{% endfor %}
+							</div>
+						</div>
+					</div>
+
+					<div class="card">
+						<strong>Specialization:</strong><br>
+
+						<div class="dropdown" id="specialization-list">
+
+							{% if specialization_list[character.specialization] %}
+								{% set ch_specialization_name = specialization_list[character.specialization] %}
+							{% else %}			
+								{% set ch_specialization_name = 'None selected' %}
+							{% endif %}				
+							
+							<button onclick="onDropdownSelect('specialization')" class="dropbtn">{{ ch_specialization_name }}</button>
+							<div class="dropdown-content" id="listDropdown-specialization">
+								{% for specialization_name in specialization_list.keys() %}
+								<button class="dropdown-element save-prop" data-key="{{ Strings.specialization.value }}" data-value="{{ specialization_name }}" data-display="{{ specialization_list[specialization_name] }}">{{ specialization_list[specialization_name] }}</button>
+								{% endfor %}
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+
+
+				<h2>Character Attributes</h2>
+				<div class="grid">
+					<div class="card">
+							<table class="attributes">
+								<thead>
+									<tr>
+										<th>Attribute</th>
+										<th>Value</th>
+										<th>Bonus</th>
+									</tr>
+								</thead>
+								<tbody
+									<tr>
+										<td>Endurance</td>
+										<td>
+											{% set val_endurance = character.attributes()[Strings.Attributes.endurance.value] %}
+											<button class="add save-prop" data-key="{{ Strings.Attributes.endurance.value }}" data-delta="1">+1</button>
+											<span id="prop-{{ Strings.Attributes.endurance.value }}">{{ val_endurance }}</span>
+											<button class="subtract save-prop" data-key="{{ Strings.Attributes.endurance.value }}" data-delta="-1">-1</button>
+										</td>
+										<td>
+											{% set val_endurance_bonus = character.attribute_bonuses()[Strings.Attributes.endurance_bonus.value] %}
+											<span id="prop-{{ Strings.Attributes.endurance_bonus.value }}">{{ val_endurance_bonus }}</span>
+										</td>
+									</tr>
+									<tr>
+										<td>Strength</td>
+										<td>
+											{% set val_strength = character.attributes()[Strings.Attributes.strength.value] %}
+											<button class="add save-prop" data-key="{{ Strings.Attributes.strength.value }}" data-delta="1">+1</button>
+											<span id="prop-{{ Strings.Attributes.strength.value }}">{{ val_strength }}</span>
+											<button class="subtract save-prop" data-key="{{ Strings.Attributes.strength.value }}" data-delta="-1">-1</button>
+										</td>
+										<td>
+											{% set val_strength_bonus = character.attribute_bonuses()[Strings.Attributes.strength_bonus.value] %}
+											<span id="prop-{{ Strings.Attributes.strength_bonus.value }}"> {{ val_strength_bonus }}</span>
+										</td>
+									</tr>
+									<tr>
+										<td>Dexterity</td>
+										<td>
+											{% set val_dexterity = character.attributes()[Strings.Attributes.dexterity.value] %}
+											<button class="add save-prop" data-key="{{ Strings.Attributes.dexterity.value }}" data-delta="1">+1</button>
+											<span id="prop-{{ Strings.Attributes.dexterity.value }}">{{ val_dexterity }}</span>
+											<button class="subtract save-prop" data-key="{{ Strings.Attributes.dexterity.value }}" data-delta="-1">-1</button>
+										</td>
+										<td>
+											{% set val_dexterity_bonus = character.attribute_bonuses()[Strings.Attributes.dexterity_bonus.value] %}
+											<span id="prop-{{ Strings.Attributes.dexterity_bonus.value }}"> {{ val_dexterity_bonus }}</span>
+										</td>
+									</tr>
+									<tr>
+										<td>Intelligence</td>
+										<td>
+											{% set val_intelligence = character.attributes()[Strings.Attributes.intelligence.value] %}
+											<button class="add save-prop" data-key="{{ Strings.Attributes.intelligence.value }}" data-delta="1">+1</button>
+											<span id="prop-{{ Strings.Attributes.intelligence.value }}">{{ val_intelligence }}</span>
+											<button class="subtract save-prop" data-key="{{ Strings.Attributes.intelligence.value }}" data-delta="-1">-1</button>
+										</td>
+										<td>
+											{% set val_intelligence_bonus = character.attribute_bonuses()[Strings.Attributes.intelligence_bonus.value] %}
+											<span id="prop-{{ Strings.Attributes.intelligence_bonus.value }}"> {{ val_intelligence_bonus }}</span>
+										</td>
+									</tr>
+									<tr>
+										<td>Charisma</td>
+										<td>
+											{% set val_charisma = character.attributes()[Strings.Attributes.charisma.value] %}
+											<button class="add save-prop" data-key="{{ Strings.Attributes.charisma.value }}" data-delta="1">+1</button>
+											<span id="prop-{{ Strings.Attributes.charisma.value }}">{{ val_charisma }}</span>
+											<button class="subtract save-prop" data-key="{{ Strings.Attributes.charisma.value }}" data-delta="-1">-1</button>
+										</td>
+										<td>
+											{% set val_charisma_bonus = character.attribute_bonuses()[Strings.Attributes.charisma_bonus.value] %}
+											<span id="prop-{{ Strings.Attributes.charisma_bonus.value }}"> {{ val_charisma_bonus }}</span>
+										</td>
+									</tr>
+								</tbody>
+								<tfoot>
+									<tr>
+										<th>Total</th>
+										<th>
+											{% set val_used_attribute_points = character.attributes()[Strings.Attributes.used_attribute_points.value] %}
+											<span id="prop-{{ Strings.Attributes.used_attribute_points.value }}"> {{ val_used_attribute_points }}</span>
+										</th>
+										<th></th>
+									</tr>
+									<tr>
+										<th>Remaining</th>
+										<th>
+											{% set val_remaining_attribute_points = character.attributes()[Strings.Attributes.remaining_attribute_points.value] %}
+											<span id="prop-{{ Strings.Attributes.remaining_attribute_points.value }}"> {{ val_remaining_attribute_points }}</span>
+										</th>
+										<th></th>
+									</tr>
+								</tfoot>
+							</table>
+					</div>
+					<div class="card">
+						<table class="history">
+							<thead>
+								<tr>
+									<th>Max HP</th>
+									<td>
+										<span id="stat-{{Strings.Statistics.max_hp.value}}">
+											{{ character.statistics()[Strings.Statistics.max_hp.value] }}
+										</span>
+									</td>
+									<td></td>
+									<td></td>
+								</tr>
+							</thead>
+							<tbody>
+								{% for hp in character.hp_history %}
+									<tr>
+										<td>
+										</td>
+										<td>{{ hp.get_properties()[Strings.val.value] }}</td>
+										<td>{{ hp.get_properties()[Strings.description.value] }}</td>
+										<td>
+											<button class="danger remove-entry" data-key="{{ Strings.hp_history.value }}" data-value="{{ hp.get_properties()[Strings.entry_number.value] }}">Remove</button>
+										</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+							<tfoot>
+								<tr>
+									<th>Current HP</th>
+									<td>
+										<span id="stat-{{Strings.Statistics.hp.value}}">
+											{{ character.statistics()[Strings.Statistics.hp.value] }}
+										</span>
+									</td>
+									<td></td>
+									<td></td>
+								</tr>
+								
+							</tfoot>
+						</table>
+
+						<table class="add-entry">
+							<thead>
+								<tr>
+									<th>Add</th>
+									<td></td>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>
+										<textarea id="add-entry-desc-{{Strings.hp_history.value}}" rows="1" placeholder="Description"></textarea>
+									</td>
+									<td>
+										<textarea id="add-entry-value-{{Strings.hp_history.value}}" rows="1" placeholder="Value"></textarea>
+									</td>
+								</tr>
+							</tbody>
+						</table>	
+						<button class="save" onclick='addEntry("{{Strings.hp_history.value}}")'>Save</button>
+
+					</div>
+				</div>
+
+				<h2>Character Experience</h2>
+				<div class="card">
+
+					<table class="history">
+						<thead>
+							<tr>
+								<th>Current level</th>
+								<td>
+									<span id="stat-{{Strings.Statistics.level.value}}">
+										{{ character.level }}
+									</span>
+								</td>
+								<td></td>
+								<td></td>
+							</tr>
+						</thead>
+						<tbody>
+							{% for xp in character.xp_history %}
+								<tr>
+									<td></td>
+									<td>{{ xp.get_properties()[Strings.val.value] }}</td>
+									<td>{{ xp.get_properties()[Strings.description.value] }}</td>
+									<td>
+										<button class="danger remove-entry" data-key="{{ Strings.xp_history.value }}" data-value="{{ xp.get_properties()[Strings.entry_number.value] }}">Remove</button>
+									</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+						<tfoot>
+							<tr>
+								<th>Total experience</th>
+								<td>
+									<span id="stat-{{Strings.Statistics.experience.value}}">
+										{{ character.experience }}
+									</span>
+								</td>
+								<td></td>
+								<td></td>
+							</tr>
+							
+						</tfoot>
+					</table>
+
+					<table class="add-entry">
+						<thead>
+							<tr>
+								<th>Add</th>
+								<td></td>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>
+									<textarea id="add-entry-desc-{{Strings.xp_history.value}}" rows="1" placeholder="Description"></textarea>
+								</td>
+								<td>
+									<textarea id="add-entry-value-{{Strings.xp_history.value}}" rows="1" placeholder="Value"></textarea>
+								</td>
+							</tr>
+						</tbody>
+					</table>	
+					<button class="save" onclick='addEntry("{{Strings.xp_history.value}}")'>Save</button>
+
+				</div>
+
+
+
+				<h2>Character Equipment</h2>
+				<div class="grid">
+					<div class="card">
+
+						<strong>Armour</strong>
+
+						<div class="grid">
+
+							{% for num_allowed_armour in range(0, max_armour_sets) %}
+
+								{% set ch_armour_list = character.armour %}
+								{% set ch_armour_key = ch_armour_list[num_allowed_armour] %}
+
+								{% if armour_list[ch_armour_key] %}
+									{% set ch_armour_name = armour_list[ch_armour_key] %}
+								{% else %}			
+									{% set ch_armour_name = 'Empty' %}
+								{% endif %}				
+
+								<div id="armour-{{num_allowed_armour}}" class="dropdown">
+
+									<button onclick="onDropdownSelect('armour')" class="dropbtn">{{num_allowed_armour + 1}}: {{ch_armour_name}}</button>
+									<div id="listDropdown-armour" class="dropdown-content">
+										{% for armour_name in armour_list.keys() %}
+										<button class="dropdown-element save-prop" data-key="{{ Strings.Armour.armour.value }}" data-value="{{num_allowed_armour}}-{{ armour_name }}" data-display="{{ armour_list[armour_name] }}">{{ armour_list[armour_name] }}</button>
+										{% endfor %}
+									</div>
+								</div>
+
+							{% endfor %}
+						</div>
+
+					</div>
+
+					<div class="card">
+
+						<strong>Weapons</strong>
+
+							<div class="grid">
+
+								{% for num_allowed_weapon in range(0, max_nb_weapons) %}
+
+									{% set ch_weapon_list = character.weapons %}
+									{% set ch_weapon_key = ch_weapon_list[num_allowed_weapon] %}
+
+									{% if weapon_list[ch_weapon_key] %}
+										{% set ch_weapon_name = weapon_list[ch_weapon_key] %}
+									{% else %}			
+										{% set ch_weapon_name = 'Empty' %}
+									{% endif %}				
+
+									<div id="weapon-{{num_allowed_weapon}}" class="dropdown">
+
+										<button onclick="onDropdownSelect('weapon')" class="dropbtn">{{num_allowed_weapon + 1}}: {{ch_weapon_name}}</button>
+										<div id="listDropdown-weapon" class="dropdown-content">
+											{% for weapon_key in weapon_list.keys() %}
+												<button class="dropdown-element save-prop" data-key="{{ Strings.Weapons.weapons.value }}" data-value="{{num_allowed_weapon}}-{{ weapon_key }}" data-display="{{ weapon_list[weapon_key] }}">{{ weapon_list[weapon_key] }}</button>
+											{% endfor %}
+										</div>
+									</div>
+
+								{% endfor %}
+							</div>
+
+					</div>
+				</div>
+					
+
+
+
+
+
+				<h2>Character Abilities</h2>
+				<div class="grid">
+					<div class="card">
+						<strong>
+							Max ability points: 
+						</strong>
+						<span id="ability-max_points">
+							{{ character.max_ability_points }}
+						</span>
+					</div>
+					<div class="card">
+						<strong>
+							Available ability points: 
+						</strong>
+						<span id="ability-remaining_points">
+							{{ character.remaining_ability_points }}
+						</span>
+					</div>
+				</div>
+
+
+
+				<div class="card">
+					<table class="abilities">
+						<thead>
+							<tr>
+								<th>Ability</th>
+								<th>Level</th>
+								<th>Cost per level up<br>1 level / 2 levels</th>
+								<th>Max upgrades per level up</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for ability_key, ability_data in ability_list.items() %}
+							{% set ch_ability = character.abilities[ability_key] %}
+								<tr>
+									<td>
+										{{ ability_data[Strings.names.value] }}
+									</td>
+									<td>
+										{% if ability_data[Strings.Abilities.cost.value]|length > 1 and ability_data[Strings.Abilities.max_upgrades_per_level.value] > 1 %}
+										<button class="add save-prop" data-key="{{ ability_key }}" data-delta="2">+2</button>
+										{% endif %}
+										<button class="add save-prop" data-key="{{ ability_key }}" data-delta="1">+1</button>
+										{% if ch_ability %}
+										<span id="ability-{{ ability_key }}">
+											{{ ch_ability[Strings.Abilities.level.value] }}
+										</span>
+										{% else %}
+										<span id="ability-{{ ability_key }}">
+											0
+										</span>
+										{% endif %}
+										<button class="subtract save-prop" data-key="{{ ability_key }}" data-delta="-1">-1</button>
+										{% if ability_data[Strings.Abilities.cost.value]|length > 1 and ability_data[Strings.Abilities.max_upgrades_per_level.value] > 1 %}
+										<button class="subtract save-prop" data-key="{{ ability_key }}" data-delta="-2">-2</button>
+										{% endif %}
+									</td>
+									<td>
+										{% for cost in ability_data[Strings.Abilities.cost.value] %}
+											{{ cost }} {{" / " if not loop.last }}
+										{% endfor %}
+									</td>
+									<td>
+										{{ ability_data[Strings.Abilities.max_upgrades_per_level.value] }}
+									</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+
+
+
+			</div>
+
+			<div class="card" style="margin-top:50px">
+				<h2 style="margin-top: 5px; margin-bottom: 30px" >Danger Zone</h2>
+				<!-- <div class="card"> -->
+					<div>
+						<form method="post" action="{{ url_for('delete') }}" style="display:inline">
+						<button class="danger">Delete character</button>
+						</form>
+					</div>
+				<!-- </div> -->
+			</div>
+		</div>
+
+		<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/editor.js') }}"></script>
+
+	</body>
+</html>

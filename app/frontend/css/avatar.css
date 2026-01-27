@@ -1,0 +1,48 @@
+
+/* Form for avatar upload */
+form.inline{display:inline; margin-left:8px}
+
+
+/* avatar */
+
+/* keeps image and buttons aligned */
+.avatar-wrapper{
+    /* border: 1px solid blue; */
+    overflow: hidden;
+    display: flex;
+    gap: 12px;
+}
+
+/* container avatar image sizing and transition */
+.avatar-image{
+    max-width:120px; 
+    display:flex; 
+    align-items:center; 
+    justify-content:center;
+    /* border: 1px solid red; */
+}
+
+img.avatar{
+    max-width:inherit; 
+    width:100%; 
+    height:100%; 
+    object-fit:cover; 
+    border-radius:6px; 
+    
+    border:1px solid #e5e7eb; 
+    display:block; 
+    transition:opacity .25s ease, transform .18s ease
+}
+.avatar.placeholder{filter:grayscale(60%); opacity:.7}
+
+.avatar-options{
+    margin-left: 20px;
+    vertical-align:bottom;
+    float: right;
+    width: auto;
+    height: inherit;
+    /* border: 1px solid green; */
+}
+
+
+/* button.submit{margin-top: 20px;} */

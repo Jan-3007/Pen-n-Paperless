@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Characters</title>
+  </head>
+  <body>
+    <h1>Characters</h1>
+    <form method="get" action="{{ url_for('characters_list') }}">
+      <input name="q" placeholder="Search" value="{{ query }}">
+      <button type="submit">Search</button>
+    </form>
+
+    {% if characters %}
+      <ul>
+        {% for c in characters %}
+          <li>{{ c.name }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No characters yet.</p>
+    {% endif %}
+
+    <p><a href="{{ url_for('index') }}">Back</a></p>
+  </body>
+</html>

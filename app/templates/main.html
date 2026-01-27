@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="Character Hub for a Pen and Paper game">
+		<title>{{ game_name }} Character Hub</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+	</head>
+	<body>
+		<div class="container">
+			<header style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+				<div>
+					<h1>Character Hub</h1>
+					<div class="small">Welcome to the world of {{ game_name }}</div>
+				</div>
+				
+				{% if character_name %}
+				<div style="display:flex; align-items:center; gap:12px;">
+
+					<div class="avatar-wrapper">
+
+						<div style="padding-right:20px">
+							Logged in as <strong>{{ character_name }}</strong><br>
+						<!-- </div>
+						<div> -->
+							<form method="post" action="{{ url_for('logout') }}" style="display:inline; ">
+								<button class="danger">Logout</button>
+							</form>
+						</div>
+
+
+						<div class="avatar-image">
+							{% if avatar_url_webp or avatar_url %}
+								<picture>
+									{% if avatar_url_webp %}
+										<source srcset="{{ avatar_url_webp }}" type="image/webp">
+									{% endif %}
+									<img src="{{ avatar_url or avatar_url_webp }}" alt="avatar" class="avatar">
+								</picture>
+							{% endif %}
+						</div>
+					</div>
+				</div>
+				{% endif %}
+			</header>
+			
+			{% set flashed = get_flashed_messages(with_categories=True) %}
+			<script id="flashed-data" type="application/json">{{ flashed|tojson }}</script>
+
+			<div class="card">
+				<h2>Characters</h2>
+
+					{% if characters %}
+						<div class="grid">
+							{% set count = 0 %}
+							{% for c in characters %}
+								<div class="card" style="width:m;">
+									
+									<div class="avatar-wrapper">
+										<div>
+											{{ c.name }}
+											<br>
+											<form method="post" action="{{ url_for('login_or_create') }}" class="inline" style="margin-left:0px">
+												<input type="hidden" name="name" value="{{ c.name }}">
+												<button type="submit" class="save">Login</button>
+											</form>
+										</div>
+
+										<div class="avatar-image">
+											{% if avatar_url_webp or avatar_url %}
+												<picture>
+													{% if avatar_url_webp %}
+														<source srcset="{{ avatar_url_webp }}" type="image/webp">
+													{% endif %}
+													<img src="{{ avatar_url or avatar_url_webp }}" alt="avatar" class="avatar">
+												</picture>
+											{% endif %}
+										</div>
+									</div>
+
+								</div>
+								{% set count = count + 1 %}
+							{% endfor %}
+						</div>
+					{% else %}
+						<p>No characters yet.</p>
+					{% endif %}
+            </div>
+            
+            <div class="card">
+				<h3 style="margin-top:12px">Create new character</h3>
+
+					<form method="post" action="{{ url_for('login_or_create') }}">
+						<label for="name">Character name</label>
+						<input id="name" name="name" required>
+						<button type="submit">Create</button>
+					</form>
+			</div>
+		</div>
+
+		<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+	</body>
+</html>

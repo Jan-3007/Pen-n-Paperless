@@ -32,15 +32,15 @@ from pen_n_paperless.common.keys import get_enum_values,\
                                         
 
 from .attributes import Attributes
+from .history import History
 
 
 class Character(db.Model):
     __tablename__ = "table_characters"
 
 
-    _id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
+    _id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True)
     _name: Mapped[str] = mapped_column(String(100), default="")
-    # _name = db.Column(db.String(100), default="")
 
     # Tribe, Profession and Specialization
     _tribe: Mapped[Tribes] = mapped_column(Enum(Tribes, values_callable=get_enum_values), nullable=True, default=None)
@@ -67,11 +67,10 @@ class Character(db.Model):
     # Notes
     _notes: Mapped[str] = mapped_column(Text, default='')
 
-    # XP history
-    # TODO: XP history instance
-
-    # HP history
-    # TODO: HP history instance
+    # HP and XP history
+    # HP history is element 0, XP history is element 1
+    # associate the history table in a many-to-one relationship
+    _histories: Mapped[List[History]] = relationship(back_populates='_character')
 
 
 

@@ -6,6 +6,8 @@
 import logging
 
 from flask import flash
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
 
 
 # internal imports
@@ -19,7 +21,17 @@ from pen_n_paperless.common.keys import Attributes as key
 class Attributes():
     __tablename__ = "table_attributes"
 
+    _id = db.Column(db.Integer, autoincrement=True, primary_key=True)
 
+    # associate the character table in a one-to-one relationship
+    _character_id = db.Column(db.Integer, ForeignKey("table_characters._id"))
+    _character = relationship(
+        'Character',
+        back_populates='_attributes'
+    )
+
+
+    # Members
     _endurance = db.Column(db.Integer, default=0)
     _endurance_bonus = db.Column(db.Integer, default=0)
 

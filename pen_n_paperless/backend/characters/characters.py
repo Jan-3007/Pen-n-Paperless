@@ -7,6 +7,7 @@ from typing import List
 
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy import Enum
+from sqlalchemy.orm import relationship
 
 
 
@@ -17,7 +18,6 @@ from pen_n_paperless.common.keys import get_enum_values,\
                                         Tribes, \
                                         Professions, \
                                         Specializations
-
 
 
 
@@ -39,8 +39,11 @@ class Character(db.Model):
     _level = db.Column(db.Integer, default=1)
     _max_hp = db.Column(db.Integer, default=100)
 
-    # Attributes
-    # TODO: Attributes instance
+    # Attributes - one-to-one relationship
+    _attributes = relationship(
+        'Attributes',
+        back_populates='_character'
+    )
 
     # Abilities
     # TODO: Abilities instance

@@ -303,5 +303,6 @@ class Attributes():
                 logging.error(f'Tried to update an unknown attribute bonus for the attribute "{attribute_key}"')
                 flash(f'Internal error', 'error')
                 return False
-
+            
+        db.session.commit()
         return True

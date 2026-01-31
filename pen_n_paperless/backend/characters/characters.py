@@ -114,14 +114,14 @@ class Character(db.Model):
     def level(self) -> int:
         return self._level
     @property
+    def experience(self) -> int:
+        return self.xp_history.get_total()
+    @property
     def max_hp(self) -> int:
         return self._max_hp
     @property
     def current_hp(self) -> int:
         return self.max_hp - self.hp_history.get_total()
-    @property
-    def experience(self) -> int:
-        return self.xp_history.get_total()
 
     # Attributes
     @property

@@ -19,6 +19,8 @@ from sqlalchemy.orm import  relationship,\
 
 
 # internal imports
+from pen_n_paperless import db
+
 from .characters import Character
 
 
@@ -84,13 +86,43 @@ class History():
         :rtype: int
         """
 
-        return 0
+        sum = 0
+
+        for entry in self._entries:
+            sum += entry.value
+
+        return sum
     
-    def add_entry(self):
+    def add_entry(self, value: int, description: str):
+
+        self._entries.append(Entry(value, description))
+
+        db.session.commit()
+        flash("New entry added", "success")
         return
     
-    def delete_entry(self):
-        return
+    def delete_entry(self, id: int) -> bool:
+        """
+        Docstring for delete_entry
+        
+        :param self: Description
+        :param id: Description
+        :type id: int
+        :return: True when entry successfully deleted
+        :rtype: bool
+        """
+        
+        for entry in self._entries:
+            if entry._id == id:
+                self._entries.remove(entry)
+                
+                flash("Entry removed", "success")
+                db.session.commit()
+                return True
+        
+        logging.error(f"Failed to delete entry with ID {id}. Entry not found.")
+        flash("Internal error", "error")
+        return False
     
     def get_entries(self) -> List:
         return self._entries

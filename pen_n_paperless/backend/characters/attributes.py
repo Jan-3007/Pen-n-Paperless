@@ -6,8 +6,12 @@
 import logging
 
 from flask import flash
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import  Integer,\
+                        ForeignKey
+
+from sqlalchemy.orm import  relationship,\
+                            Mapped,\
+                            mapped_column
 
 
 # internal imports
@@ -16,41 +20,43 @@ from pen_n_paperless import db
 from pen_n_paperless.config.character import CharacterConfig
 from pen_n_paperless.common.keys import Attributes as key
 
+# uncomment import at bottom of characters.py in case of cyclic import
+from .characters import Character
+
+
+
 
 
 class Attributes():
     __tablename__ = "table_attributes"
 
-    _id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    _id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True)
 
     # associate the character table in a one-to-one relationship
-    _character_id = db.Column(db.Integer, ForeignKey("table_characters._id"))
-    _character = relationship(
-        'Character',
-        back_populates='_attributes'
-    )
+    _character_id: Mapped[int] = mapped_column(ForeignKey("table_characters._id"))
+    _character: Mapped['Character'] = relationship(back_populates='_attributes', single_parent=True)
 
 
     # Members
-    _endurance = db.Column(db.Integer, default=0)
-    _endurance_bonus = db.Column(db.Integer, default=0)
+    _endurance: Mapped[int] = mapped_column(Integer, default=0)
+    _endurance_bonus: Mapped[int] = mapped_column(Integer, default=0)
 
-    _strength = db.Column(db.Integer, default=0)
-    _strength_bonus = db.Column(db.Integer, default=0)
+    _strength: Mapped[int] = mapped_column(Integer, default=0)
+    _strength_bonus: Mapped[int] = mapped_column(Integer, default=0)
 
-    _dexterity = db.Column(db.Integer, default=0)
-    _dexterity_bonus = db.Column(db.Integer, default=0)
+    _dexterity: Mapped[int] = mapped_column(Integer, default=0)
+    _dexterity_bonus: Mapped[int] = mapped_column(Integer, default=0)
 
-    _intelligence = db.Column(db.Integer, default=0)
-    _intelligence_bonus = db.Column(db.Integer, default=0)
+    _intelligence: Mapped[int] = mapped_column(Integer, default=0)
+    _intelligence_bonus: Mapped[int] = mapped_column(Integer, default=0)
 
-    _charisma = db.Column(db.Integer, default=0)
-    _charisma_bonus = db.Column(db.Integer, default=0)
+    _charisma: Mapped[int] = mapped_column(Integer, default=0)
+    _charisma_bonus: Mapped[int] = mapped_column(Integer, default=0)
 
 
-    _total_points = db.Column(db.Integer, default=CharacterConfig.total_attribute_points())
-    _used_points = db.Column(db.Integer, default=0)
-    _remaining_points = db.Column(db.Integer, default=0)
+    _total_points: Mapped[int] = mapped_column(Integer, default=CharacterConfig.total_attribute_points())
+    _used_points: Mapped[int] = mapped_column(Integer, default=0)
+    _remaining_points: Mapped[int] = mapped_column(Integer, default=0)
 
 
 

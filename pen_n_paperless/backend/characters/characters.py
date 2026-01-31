@@ -8,6 +8,15 @@ from typing import List
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy import Enum
 from sqlalchemy.orm import relationship
+from sqlalchemy import  Enum,\
+                        String,\
+                        Integer,\
+                        Text,\
+                        PickleType
+                        
+from sqlalchemy.orm import  relationship,\
+                            Mapped,\
+                            mapped_column
 
 
 
@@ -15,48 +24,48 @@ from sqlalchemy.orm import relationship
 from pen_n_paperless import db
 
 from pen_n_paperless.common.keys import get_enum_values,\
+                                        Generic,\
                                         Tribes, \
                                         Professions, \
                                         Specializations
 
+                                        
 
+from .attributes import Attributes
 
 
 class Character(db.Model):
     __tablename__ = "table_characters"
 
 
-    # _id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
-    _id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    _name = db.Column(db.String(100), default="")
+    _id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
+    _name: Mapped[str] = mapped_column(String(100), default="")
+    # _name = db.Column(db.String(100), default="")
 
     # Tribe, Profession and Specialization
-    _tribe = db.Column(Enum(Tribes, values_callable=get_enum_values), nullable=True, default=None)
-    _profession = db.Column(Enum(Professions, values_callable=get_enum_values), nullable=True, default=None)
-    _specialization = db.Column(Enum(Specializations, values_callable=get_enum_values), nullable=True, default=None)
+    _tribe: Mapped[Tribes] = mapped_column(Enum(Tribes, values_callable=get_enum_values), nullable=True, default=None)
+    _profession: Mapped[Professions] = mapped_column(Enum(Professions, values_callable=get_enum_values), nullable=True, default=None)
+    _specialization: Mapped[Specializations] = mapped_column(Enum(Specializations, values_callable=get_enum_values), nullable=True, default=None)
 
     # Statistics
-    _level = db.Column(db.Integer, default=1)
-    _max_hp = db.Column(db.Integer, default=100)
+    _level: Mapped[int] = mapped_column(Integer, default=1)
+    _max_hp: Mapped[int] = mapped_column(Integer, default=100)
 
     # Attributes - one-to-one relationship
-    _attributes = relationship(
-        'Attributes',
-        back_populates='_character'
-    )
+    _attributes: Mapped['Attributes'] = relationship(back_populates='_character')
 
     # Abilities
     # TODO: Abilities instance
 
     # Armour
-    _defense_bonus = db.Column(db.Integer, default=0)
-    _equipped_armour = db.Column(MutableList.as_mutable(db.PickleType), default=list)
+    _defense_bonus: Mapped[int] = mapped_column(Integer, default=0)
+    _equipped_armour: Mapped[List] = mapped_column(MutableList.as_mutable(PickleType), default=list)
 
     # Weapons
-    _equipped_weapons = db.Column(MutableList.as_mutable(db.PickleType), default=list)
+    _equipped_weapons: Mapped[List] = mapped_column(MutableList.as_mutable(PickleType), default=list)
 
     # Notes
-    _notes = db.Column(db.Text, default='')
+    _notes: Mapped[str] = mapped_column(Text, default='')
 
     # XP history
     # TODO: XP history instance
@@ -254,4 +263,6 @@ def delete_character(character_id: int) -> bool:
     return success
 
 
-
+# this import is only so that Character is available in the Attributes class
+# a direct include in attribute.py would mean a cyclic import
+# from .attribute import Attributes

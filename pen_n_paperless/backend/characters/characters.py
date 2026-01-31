@@ -6,8 +6,6 @@ import logging
 from typing import List
 
 from sqlalchemy.ext.mutable import MutableList
-from sqlalchemy import Enum
-from sqlalchemy.orm import relationship
 from sqlalchemy import  Enum,\
                         String,\
                         Integer,\
@@ -73,14 +71,14 @@ class Character(db.Model):
     _histories: Mapped[List[History]] = relationship(back_populates='_character')
 
 
+# -------------------------------------------------------------------------------
 
-    def __init__(self, display_name: str):
+    def __init__(self, display_name: str) -> None:
         self._name = display_name
         return
 
     def __str__(self) -> str:
-        return f"Hi. My name is {self._name}."
-    
+        return f"Hi. My name is {self.name}."
 
 
 # -------------------------------------------------------------------------------
@@ -124,31 +122,59 @@ class Character(db.Model):
         return -1
     @property
     def experience(self) -> int:
-        # get from XP history instance
-        return -1
+        return self.xp_history.get_total()
 
     # Attributes
-
+    @property
+    def attributes(self) -> dict:
+        return self._attributes.get_attributes()
+    @property
+    def attribute_bonuses(self) -> dict:
+        return self._attributes.get_attribute_bonuses()
+    @property
+    def attribute_points(self) -> dict:
+        return {
+            Generic.TOTAL_POINTS: self._attributes.total_points,
+            Generic.USED_POINTS: self._attributes.used_points,
+            Generic.REMAINING_POINTS: self._attributes.remaining_points
+        }
+    # when setting attributes, call _update_max_hp, _update_attribute_bonuses
 
     # Abilities
 
     # Armour
-    @property
-    def defense_bonus(self) -> int:
-        return self._defense_bonus
-    @property
-    def equipped_arrmour(self) -> list:
-        return self._equipped_armour
+    # @property
+    # def defense_bonus(self) -> int:
+    #     return self._defense_bonus
+    # @property
+    # def equipped_arrmour(self) -> list:
+    #     return self._equipped_armour
     
-    # Weapons
-    @property
-    def equipped_weapons(self) -> list:
-        return self._equipped_weapons
+    # # Weapons
+    # @property
+    # def equipped_weapons(self) -> list:
+    #     return self._equipped_weapons
     
     # Notes
+    # @property
+    # def notes(self) -> str:
+    #     return self._notes
+
+    # Histories
     @property
-    def notes(self) -> str:
-        return self._notes
+    def hp_history(self) -> History:
+        return self._histories[0]
+    @property
+    def xp_history(self) -> History:
+        return self._histories[1]
+
+
+# -------------------------------------------------------------------------------
+
+    # public methods
+
+
+    # private methods
 
 
 # -------------------------------------------------------------------------------

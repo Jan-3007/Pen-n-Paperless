@@ -17,7 +17,7 @@
 
 				<header style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
 					<div>
-						<h1>{{ character.name }}</h1>
+						<h1 id="character_name">{{ character.name }}</h1>
 					</div>
 					<!-- move the logout button to the top of the page, left of the navigation bar -->
 					<div>
@@ -84,12 +84,11 @@
 					</div>
 				</div>
 
-				<!-- all good until here -->
 
 				<h2>Character Attributes</h2>
 				
 				<div class="grid">
-					{% if character.attributes %}
+					{% if character.attributes && character.attribute_bonuses %}
 					<div class="card">
 							<table class="attributes">
 								<thead>
@@ -103,55 +102,55 @@
 									<tr>
 										<td>Endurance</td>
 										<td>
-											{% set val_endurance = character.attributes()[Strings.Attributes.endurance.value] %}
+											{% set val_endurance = character.attributes.get(keys.Attributes.ENDURANCE, -1) %}
 											<span id="prop-{{ Strings.Attributes.endurance.value }}">{{ val_endurance }}</span>
 										</td>
 										<td>
-											{% set val_endurance_bonus = character.attribute_bonuses()[Strings.Attributes.endurance_bonus.value] %}
+											{% set val_endurance_bonus = character.attribute_bonuses.get(keys.Attributes.ENDURANCE_BONUS, -1) %}
 											<span id="prop-{{ Strings.Attributes.endurance_bonus.value }}">{{ val_endurance_bonus }}</span>
 										</td>
 									</tr>
 									<tr>
 										<td>Strength</td>
 										<td>
-											{% set val_strength = character.attributes()[Strings.Attributes.strength.value] %}
+											{% set val_strength = character.attributes.get(keys.Attributes.STRENGTH, -1) %}
 											<span id="prop-{{ Strings.Attributes.strength.value }}">{{ val_strength }}</span>
 										</td>
 										<td>
-											{% set val_strength_bonus = character.attribute_bonuses()[Strings.Attributes.strength_bonus.value] %}
+											{% set val_strength_bonus = character.attribute_bonuses.get(keys.Attributes.STRENGTH_BONUS, -1) %}
 											<span id="prop-{{ Strings.Attributes.strength_bonus.value }}"> {{ val_strength_bonus }}</span>
 										</td>
 									</tr>
 									<tr>
 										<td>Dexterity</td>
 										<td>
-											{% set val_dexterity = character.attributes()[Strings.Attributes.dexterity.value] %}
+											{% set val_dexterity = character.attributes.get(keys.Attributes.DEXTERITY, -1) %}
 											<span id="prop-{{ Strings.Attributes.dexterity.value }}">{{ val_dexterity }}</span>
 										</td>
 										<td>
-											{% set val_dexterity_bonus = character.attribute_bonuses()[Strings.Attributes.dexterity_bonus.value] %}
+											{% set val_dexterity_bonus = character.attribute_bonuses.get(keys.Attributes.DEXTERITY_BONUS, -1) %}
 											<span id="prop-{{ Strings.Attributes.dexterity_bonus.value }}"> {{ val_dexterity_bonus }}</span>
 										</td>
 									</tr>
 									<tr>
 										<td>Intelligence</td>
 										<td>
-											{% set val_intelligence = character.attributes()[Strings.Attributes.intelligence.value] %}
+											{% set val_intelligence = character.attributes.get(keys.Attributes.INTELLIGENCE, -1) %}
 											<span id="prop-{{ Strings.Attributes.intelligence.value }}">{{ val_intelligence }}</span>
 										</td>
 										<td>
-											{% set val_intelligence_bonus = character.attribute_bonuses()[Strings.Attributes.intelligence_bonus.value] %}
+											{% set val_intelligence_bonus = character.attribute_bonuses.get(keys.Attributes.INTELLIGENCE_BONUS, -1) %}
 											<span id="prop-{{ Strings.Attributes.intelligence_bonus.value }}"> {{ val_intelligence_bonus }}</span>
 										</td>
 									</tr>
 									<tr>
 										<td>Charisma</td>
 										<td>
-											{% set val_charisma = character.attributes()[Strings.Attributes.charisma.value] %}
+											{% set val_charisma = character.attributes.get(keys.Attributes.CHARISMA, -1) %}
 											<span id="prop-{{ Strings.Attributes.charisma.value }}">{{ val_charisma }}</span>
 										</td>
 										<td>
-											{% set val_charisma_bonus = character.attribute_bonuses()[Strings.Attributes.charisma_bonus.value] %}
+											{% set val_charisma_bonus = character.attribute_bonuses.get(keys.Attributes.CHARISMA_BONUS, -1) %}
 											<span id="prop-{{ Strings.Attributes.charisma_bonus.value }}"> {{ val_charisma_bonus }}</span>
 										</td>
 									</tr>
@@ -160,7 +159,7 @@
 									<tr>
 										<th>Total</th>
 										<th>
-											{% set val_used_attribute_points = character.attributes()[Strings.Attributes.used_attribute_points.value] %}
+											{% set val_used_attribute_points = character.attribute_points.get(keys.Generic.TOTAL_POINTS, -1) %}
 											<span id="prop-{{ Strings.Attributes.used_attribute_points.value }}"> {{ val_used_attribute_points }}</span>
 										</th>
 										<th></th>
@@ -168,7 +167,7 @@
 									<tr>
 										<th>Remaining</th>
 										<th>
-											{% set val_remaining_attribute_points = character.attributes()[Strings.Attributes.remaining_attribute_points.value] %}
+											{% set val_remaining_attribute_points = character.attribute_points.get(keys.Generic.REMAINING_POINTS, -1) %}
 											<span id="prop-{{ Strings.Attributes.remaining_attribute_points.value }}"> {{ val_remaining_attribute_points }}</span>
 										</th>
 										<th></th>
@@ -177,15 +176,16 @@
 							</table>
 					</div>
 					{% endif %}
-					{% if character.statistics %}
+					
+					{% if character.max_hp && character.current_hp %}
 					<div class="card">
 						<table class="history">
 							<thead>
 								<tr>
 									<th>Max HP</th>
 									<td>
-										<span id="stat-{{Strings.Statistics.max_hp.value}}">
-											{{ character.statistics()[Strings.Statistics.max_hp.value] }}
+										<span id="stat-{{keys.Statistics.MAX_HP}}">
+											{{ character.max_hp }}
 										</span>
 									</td>
 									<td></td>
@@ -193,14 +193,12 @@
 								</tr>
 							</thead>
 							<tbody>
-								{% for hp in character.hp_history %}
+								{% for hp_entry in character.hp_history.get_entries() %}
 									<tr>
-										<td>
-										</td>
-										<td>{{ hp.get_properties()[Strings.val.value] }}</td>
-										<td>{{ hp.get_properties()[Strings.description.value] }}</td>
-										<td>
-										</td>
+										<td></td>
+										<td>{{ hp_entry.value }}</td>
+										<td>{{ hp_entry.description }}</td>
+										<td></td>
 									</tr>
 								{% endfor %}
 							</tbody>
@@ -208,8 +206,8 @@
 								<tr>
 									<th>Current HP</th>
 									<td>
-										<span id="stat-{{Strings.Statistics.hp.value}}">
-											{{ character.statistics()[Strings.Statistics.hp.value] }}
+										<span id="stat-{{keys.Statistics.CURRENT_HP}}">
+											{{ character.current_hp }}
 										</span>
 									</td>
 									<td></td>
@@ -223,6 +221,7 @@
 				</div>
 
 
+				<!-- all good until here -->
 
 
 
@@ -380,7 +379,7 @@
 
 				<h2>Character Experience</h2>
 				<div class="card">
-					{% if character.xp_history %}
+					{% if character.level && character.experience %}
 					<table class="history">
 						<thead>
 							<tr>
@@ -395,13 +394,12 @@
 							</tr>
 						</thead>
 						<tbody>
-							{% for xp in character.xp_history %}
+							{% for xp_entry in character.xp_history.get_entries() %}
 								<tr>
 									<td></td>
-									<td>{{ xp.get_properties()[Strings.val.value] }}</td>
-									<td>{{ xp.get_properties()[Strings.description.value] }}</td>
-									<td>
-									</td>
+									<td>{{ xp_entry.value }}</td>
+									<td>{{ xp_entry.description }}</td>
+									<td></td>
 								</tr>
 							{% endfor %}
 						</tbody>
@@ -431,16 +429,10 @@
 					</form>
 				</div>
 			</div>
-
 		</div>
-
-
-
-
 
 		<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/editor.js') }}"></script>
-
 
 	</body>
 </html>

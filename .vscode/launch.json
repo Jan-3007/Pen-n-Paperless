@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Python Debugger: Python File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}"
+        },
+        
+        {
+            "name": "pyjs_converter",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/pen_n_paperless/common/pyjs_shared_enums.py",
+            "console": "integratedTerminal",
+            "args": "${workspaceFolder}/pen_n_paperless/common/keys.py -o ${workspaceFolder}/pen_n_paperless/frontend/static/js/enums.js"
+        },    
+    ]
+}

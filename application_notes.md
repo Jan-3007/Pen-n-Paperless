@@ -6,12 +6,14 @@
 ```
 
 
-# Run this project
+# Run this project in debug mode
 ```
-uv run main.py
+uv run main.py -d
 ```
 
 
 
-
-
+# Convert Python enums to JavaScript enums
+```
+uv run main.py -i
+```

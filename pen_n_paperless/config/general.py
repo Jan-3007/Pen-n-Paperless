@@ -12,6 +12,9 @@ class GeneralConfig():
     # log level one of: DEBUG, INFORMATION, WARNING, ERROR, CRITICAL
     _log_level = logging.DEBUG
 
+    # max. avatar size: (width, height)
+    _avatar_size = (512, 1024)
+
 
     @classmethod
     def world_name(cls) -> str:
@@ -27,4 +30,10 @@ class GeneralConfig():
     def log_level(cls) -> logging._Level | None:
         """The log level of the python application"""
         return cls._log_level
+    
+    @classmethod
+    def avatar_size(cls) -> tuple:
+        """Returns the max width and max height respectively of the avatar
+        """
+        return cls._avatar_size
     

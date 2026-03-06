@@ -421,6 +421,121 @@ def delete(character_name = None):
 
 
 
+
+# call this page with 'url_for(character_name=name, 'upload_avatar')'
+@app.route('/<string:character_name>/upload_avatar', methods=['POST'])
+def upload_avatar(character_name = None):
+    
+    if request.method != 'POST':
+        logging.error(f'Unexpected request method, got: {request.method}')
+        flash(f'Internal error', 'error')
+        return {'status' : 'error', 'flashed' : get_flashed_messages(with_categories=True)}
+        # return redirect(url_for('main'))
+
+    logging.debug(f'retrieving character ID from session')
+    session_char_id = get_active_character_id()
+
+    # User is not logged in as a character
+    if session_char_id == None:
+        logging.error(f'Error while trying to access page: /{character_name}/editor. User not signed in accordingly.')
+        flash("Please sign in first", "error")
+        return {'status' : 'error', 'flashed' : get_flashed_messages(with_categories=True)}
+        # return redirect(url_for('main'))
+
+    # Resolve character from ID
+    character_from_session = get_character_by_id(session_char_id)
+    if character_from_session == None:
+        logging.error(f'Error while resolving character ID.')
+        flash(f'Internal error.', 'error')
+        return {'status' : 'error', 'flashed' : get_flashed_messages(with_categories=True)}
+        # return redirect(url_for('main'))
+
+    # User is logged in, but <character_name> does not match the name retrieved using the ID from the session, not allowed
+    if character_name != character_from_session.name:
+        logging.error(f'User tried to access a character page whilst being logged in as another character. \n\tCharacter ID from session: {character_from_session.id}. \n\tRequested character: "{character_name}"')
+        flash(f'Please log out first.', 'error')
+        return {'status' : 'error', 'flashed' : get_flashed_messages(with_categories=True)}
+        # return redirect(url_for('character_overview', character_name=character_from_session.name))
+
+    if 'avatar' not in request.files:
+        logging.error(f"Got request to upload avatar but didn't find files attached to the request.")
+        flash('No file uploaded', 'error')
+        return {'status' : 'error', 'flashed' : get_flashed_messages(with_categories=True)}
+        # return redirect(url_for('editor'))
+
+    # retrieve the avatar instance from the character
+    character_avatar = character_from_session.avatar
+    if character_avatar is None:
+        logging.error(f"Character returned 'None' while accessing its avatar.")
+        flash('No file uploaded', 'error')
+        return {'status' : 'error', 'flashed' : get_flashed_messages(with_categories=True)}
+
+    # store the file in the characters avatar instance
+    success = character_avatar.save(request.files['avatar'])
+    status = 'success' if success else 'error'
+
+    return  {
+                'status' : status, 
+                'flashed' : get_flashed_messages(with_categories=True),
+                'avatarURL' : character_avatar.file_url
+            }
+    
+
+
+# call this page with 'url_for('delete_avatar', character_name=name)'
+@app.route('/<string:character_name>/delete_avatar', methods=['POST'])
+def delete_avatar(character_name: str):
+    
+    if request.method != 'POST':
+        logging.error(f'Unexpected request method, got: {request.method}')
+        flash(f'Internal error', 'error')
+        return {'status' : 'error', 'flashed' : get_flashed_messages(with_categories=True)}
+        # return redirect(url_for('main'))
+
+    logging.debug(f'retrieving character ID from session')
+    session_char_id = get_active_character_id()
+
+    # User is not logged in as a character
+    if session_char_id == None:
+        logging.error(f'Error while trying to access page: /{character_name}/editor. User not signed in accordingly.')
+        flash("Please sign in first", "error")
+        return {'status' : 'error', 'flashed' : get_flashed_messages(with_categories=True)}
+        # return redirect(url_for('main'))
+
+    # Resolve character from ID
+    character_from_session = get_character_by_id(session_char_id)
+    if character_from_session == None:
+        logging.error(f'Error while resolving character ID.')
+        flash(f'Internal error.', 'error')
+        return {'status' : 'error', 'flashed' : get_flashed_messages(with_categories=True)}
+        # return redirect(url_for('main'))
+
+    # User is logged in, but <character_name> does not match the name retrieved using the ID from the session, not allowed
+    if character_name != character_from_session.name:
+        logging.error(f'User tried to access a character page whilst being logged in as another character. \n\tCharacter ID from session: {character_from_session.id}. \n\tRequested character: "{character_name}"')
+        flash(f'Please log out first.', 'error')
+        return {'status' : 'error', 'flashed' : get_flashed_messages(with_categories=True)}
+        # return redirect(url_for('character_overview', character_name=character_from_session.name))
+
+    # retrieve the avatar instance from the character
+    character_avatar = character_from_session.avatar
+    if character_avatar is None:
+        logging.error(f"Character returned 'None' while accessing its avatar.")
+        flash('No file uploaded', 'error')
+        return {'status' : 'error', 'flashed' : get_flashed_messages(with_categories=True)}
+
+    character_avatar.delete()
+
+    return  {
+                'status' : 'success', 
+                'flashed' : get_flashed_messages(with_categories=True),
+                'avatarURL' : character_avatar.file_url
+            }
+
+
+
+
+
 # favico.ico for older browsers
 @app.route('/favicon.ico')
 def favicon():

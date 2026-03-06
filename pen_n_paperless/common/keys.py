@@ -216,3 +216,8 @@ class Traits(Key):
     HIDDEN_BLADE = auto()
 
 
+
+class Avatars(Key):
+    AVATAR = auto()
+    UPLOAD = auto()
+    DELETE = auto()

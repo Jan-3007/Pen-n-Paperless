@@ -4,22 +4,26 @@
 import os
 from flask import current_app as app
 from flask import   session,\
+                    request,\
                     render_template,\
                     url_for,\
-                    request,\
                     redirect,\
-                    flash
-import glob
+                    flash,\
+                    send_from_directory,\
+                    get_flashed_messages
 
+import logging
 
 # internal imports
-from .routes_helpers import *
+from .routes_helpers import get_active_character_id
 
-from .. import module_root_path, avatars_path
-from ..config.general import GeneralConfig
-from ..common.keys import Generic
 
-from pen_n_paperless.backend.characters import *
+from pen_n_paperless.config.general import GeneralConfig
+from pen_n_paperless.config.character import CharacterConfig
+
+import pen_n_paperless.common.keys as keys
+
+from pen_n_paperless.backend.characters import  *
 
 from pen_n_paperless.content import *
 
@@ -40,13 +44,13 @@ def main():
     avatar_url = None
 
     # show the active character on the main page, skip if none can be found
-    if session_char_id:
+    if session_char_id >= 0:
         active_character = get_character_by_id(character_id=session_char_id)
         if active_character:
             logging.info(f'"{active_character.name}" already logged in.')
         
             # try to find avatar file
-            avatar_url = get_avatar_path(session_char_id, active_character.name)
+            avatar_url = active_character.avatar.file_url if active_character.avatar else ""
         else:
             logging.error(f"Found ID '{session_char_id}' in session, but no associated character found in database.")
             flash("Internal error", "error")
@@ -57,7 +61,7 @@ def main():
     # get avatar path for each character
     character_dict = {}
     for ch in characters:
-        character_dict[ch.name] = get_avatar_path(ch.id, ch.name)
+        character_dict[ch.name] = ch.avatar.file_url if ch.avatar else ""
 
     # render main page
     return render_template(
@@ -103,16 +107,19 @@ def login_or_create():
         existing = get_character_by_name(name)
         if existing:
             # create new session with the existing character
-            session[Generic.ID.value] = existing.id
+            session[keys.Generic.ID.value] = existing.id
             logging.info(f'Logging user in as "{existing.name}" with ID: {existing.id}.')
+            flash(f'Logged in as {existing.name}', 'success')
             return redirect(url_for('character_overview', character_name=existing.name))
 
         # create a new character
         new_character = create_character(name)
         if new_character:
-            session[Generic.ID.value] = new_character.id
+            session[keys.Generic.ID.value] = new_character.id
             logging.info(f'Created new character "{new_character.name}" with ID: {new_character.id}.')
             logging.info(f'Logging user in as "{new_character.name}" with ID: {new_character.id}.')
+            flash(f'Logged in as {new_character.name}', 'success')
+
             return redirect(url_for('character_overview', character_name=new_character.name))
 
         else:
@@ -128,7 +135,7 @@ def login_or_create():
 
 # done for now
 # call this page with 'url_for('logout')'
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
 def logout():
     """(route) in-between page: for logging out
 
@@ -136,16 +143,22 @@ def logout():
     After removing it, the user will be redirected back to the main page.
     """
 
-    id = session.pop(Generic.ID.value, None)
+    if request.method == 'POST':
 
-    char_id = session.get(Generic.ID.value, None)
-    if char_id is not None:
-        logging.error(f'logout(): Error while logging out. Failed to remove character ID from session. \n\tCharacter ID: {char_id}.')
-        flash(f'Internal error.', 'error')
-        return redirect(url_for('main'))
-    
-    logging.info(f'User with character ID "{id}" has logged out.')
-    flash('Logged out', 'success')
+        id = session.pop(keys.Generic.ID.value, None)
+
+        char_id = session.get(keys.Generic.ID.value, None)
+        if char_id is not None:
+            logging.error(f'logout(): Error while logging out. Failed to remove character ID from session. \n\tCharacter ID: {char_id}.')
+            flash(f'Internal error.', 'error')
+            return redirect(url_for('main'))
+        
+        logging.info(f'User with character ID "{id}" has logged out.')
+        flash('Logged out', 'success')
+
+    else:
+        logging.error(f'logout(): Unexpected request method, got: {request.method}')
+        flash(f'Internal error', 'error')
 
     return redirect(url_for('main'))
 
@@ -166,9 +179,11 @@ def character_overview(character_name: str):
     :param character_name: Name of the character
     :type character_name: str
     """
+
+    logging.debug(f'character_overview(): page for {character_name} requested')
     
-    logging.debug(f'character_overview(): retrieving character ID from session')
     session_char_id = get_active_character_id()
+    logging.debug(f'character_overview(): got character ID {session_char_id} from session')
 
     # User is not logged in as a character
     if session_char_id == None:
@@ -190,26 +205,29 @@ def character_overview(character_name: str):
         return redirect(url_for('character_overview', character_name=character_from_session.name))
     
     # try to find avatar
-    avatar_url = get_avatar_path(character_from_session.id, character_from_session.name)
+    avatar_url = character_from_session.avatar.file_url if character_from_session.avatar else ""
 
-    logging.info(f'Logging in as "{character_from_session.name}" with ID: {character_from_session.id}.')
-    flash(f'Logged in as {character_from_session.name}', 'success')
+    logging.info(f"Character {character_from_session.name} is accessing its overview.")
 
-    # TODO: provide lists of max_armour_sets, max_nb_weapons, ...
     return render_template(
         # template
         'character.html',
         # generic
         language = GeneralConfig.language(),
+        keys = keys,
         # character
         character = character_from_session,
         avatar_url = avatar_url,
         tribe_dict = Tribe.get_all_names(),
         profession_dict = Profession.get_all_names(),
-        specialization_dict = Specialization.get_all_names(),
+        specialization_dict = Specialization.get_available(character_from_session.profession, character_from_session.level),
         # Armour, Weapons
-        max_armour_sets = 1,
-        max_nb_weapons = 2
+        max_armour_sets = CharacterConfig.max_armour_sets(),
+        armour_dict = Armoury.get_all_names(),
+        max_nb_weapons = CharacterConfig.max_number_of_weapons(),
+        weapons_dict = Weaponry.get_all_names()
+        # Abilities
+        # ability_dict = 
     )
 
 
@@ -251,7 +269,7 @@ def editor(character_name: str):
         return redirect(url_for('character_overview', character_name=character_from_session.name))
     
     # try to find avatar file
-    avatar_url = get_avatar_path(character_from_session.id, character_from_session.name)
+    avatar_url = character_from_session.avatar.file_url if character_from_session.avatar else ""
 
     logging.info(f"Character {character_from_session.name} is accessing its editor.")
 
@@ -260,12 +278,20 @@ def editor(character_name: str):
         # template
         'character_editor.html',
         # generic
+        language = GeneralConfig.language(),
+        keys = keys,
         # character
-        character=character_from_session,
-        avatar_url=avatar_url,
+        character = character_from_session,
+        avatar_url = avatar_url,
+        avatar_dimensions = GeneralConfig.avatar_size(),
         tribe_dict = Tribe.get_all_names(),
         profession_dict = Profession.get_all_names(),
-        specialization_dict = Specialization.get_all_names(),
+        specialization_dict = Specialization.get_available(character_from_session.profession, character_from_session.level),
+        # Armour, Weapons
+        max_armour_sets = CharacterConfig.max_armour_sets(),
+        armour_dict = Armoury.get_all_names(),
+        max_nb_weapons = CharacterConfig.max_number_of_weapons(),
+        weapons_dict = Weaponry.get_all_names()
     )
 
 

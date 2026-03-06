@@ -6,7 +6,7 @@ import logging
 # internal imports
 #   main package
 from pen_n_paperless.common.keys import Tribes as key
-from pen_n_paperless.common.keys import Generic, Attributes, Armour
+from pen_n_paperless.common.keys import Key, Generic, Attributes, Armour
 
 from pen_n_paperless.common.languages import Language
 from pen_n_paperless.config.general import GeneralConfig
@@ -124,6 +124,7 @@ class Tribe(CharacterPropertiesInterface):
         return list(cls._tribes.keys())
 
 
+    # idea: add optional parameter to retrieve a specific property, e.g. by supplying Generic.NAME for the language-dependent name
     @classmethod
     def get_properties(cls, key) -> dict:
         """
@@ -154,7 +155,7 @@ class Tribe(CharacterPropertiesInterface):
             name_dict = properties.get(Generic.NAME, {})
 
             if name_dict == {}:
-                logging.warning(f"get_all_names(): get_all() returned the key {t_key}, but get_properties() did not include a value for key {Generic.NAME}")
+                logging.warning(f"get_all() returned the key {t_key}, but get_properties() did not include a value for key {Generic.NAME}")
                 tribe_dict[Generic.NONE] = "No tribe found"
             else:
                 # add entry to dict with tribe key and its display name
@@ -165,13 +166,13 @@ class Tribe(CharacterPropertiesInterface):
 
 
 
+    @classmethod
+    def get_name(cls, tribe_key) -> str:
+        """returns the language-dependent name of the tribe"""
 
-    # @classmethod
-    # def get_name(cls, tribe_key: str) -> str:
-    #     """returns the language-dependent name of the tribe"""
-
-    #     tribe_name = cls.get_properties(tribe_key).get(Strings.names.value)
-    #     if not tribe_name:
-    #         return "Error"
+        tribe_name = cls.get_properties(tribe_key).get(Generic.NAME)
+        if not tribe_name:
+            logging.warning(f"Tribe with key '{tribe_key}' has no entry for key {Generic.NAME}")
+            return "Error"
         
-    #     return tribe_name[GameSettings.language()]
+        return tribe_name.get(GeneralConfig.language(), "Error")

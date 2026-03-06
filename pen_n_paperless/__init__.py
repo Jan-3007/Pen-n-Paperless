@@ -18,10 +18,13 @@ db = SQLAlchemy()
 # Define globally available paths
 module_root_path = os.path.dirname(__file__)
 database_path = os.path.join(module_root_path, "data", "db")
-avatars_path = os.path.join(module_root_path, "data", "avatars")
+avatars_path = Path(module_root_path) / "frontend" / "static" / "avatars"
 
 
 def create_app():
+
+    # create paths
+    avatars_path.mkdir(parents=True, exist_ok=True)
 
     # Define log file path
     log_file = os.path.join(module_root_path, "logs", "pen-n-paperless.log")
@@ -32,7 +35,7 @@ def create_app():
         encoding = 'utf-8',
         filemode = 'a',
         level = GeneralConfig.log_level(),
-        format = '%(asctime)s - %(levelname)s - %(message)s'
+        format = '%(asctime)s - %(levelname)s - %(filename)s - %(funcName)s - %(message)s'
     )
 
     # Define all paths needed for app setup
@@ -44,12 +47,16 @@ def create_app():
         __name__, 
         template_folder=template_path, 
         static_folder=static_path
+
     )
     app.config.from_mapping(
         SECRET_KEY=os.environ.get('SECRET_KEY', 'dev-secret-key'),
         SQLALCHEMY_DATABASE_URI='sqlite:///' + os.path.join(database_path, 'pen-n-paperless.db'),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
     )
+
+    app.config['avatars'] = avatars_path.as_posix()
+
 
     db.init_app(app)
 

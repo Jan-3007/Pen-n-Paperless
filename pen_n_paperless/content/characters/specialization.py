@@ -4,8 +4,8 @@ import logging
 
 # internal imports
 #   main package
-from pen_n_paperless.common.keys import Specializations as key
-from pen_n_paperless.common.keys import Generic, Statistics, Traits, Abilities, Attributes
+from pen_n_paperless.common.keys import Specializations as keys
+from pen_n_paperless.common.keys import Generic, Statistics, Traits, Abilities, Attributes, Professions
 
 from pen_n_paperless.common.languages import Language
 from pen_n_paperless.config.general import GeneralConfig
@@ -19,10 +19,10 @@ from .profession import Profession
 class Specialization(CharacterPropertiesInterface):
 
     _specializations = {
-        key.PICKPOCKET: {
+        keys.PICKPOCKET: {
             Generic.DESCRIPTION: [""],
 
-            key.EVOLUTION: [
+            keys.EVOLUTION: [
                 {
                     Statistics.LEVEL: 2,
                     Generic.NAME: {
@@ -56,10 +56,10 @@ class Specialization(CharacterPropertiesInterface):
                 }
             ]
         },
-        key.ASSASSIN: {
+        keys.ASSASSIN: {
             Generic.DESCRIPTION: [""],
 
-            key.EVOLUTION: [
+            keys.EVOLUTION: [
                 {
                     Statistics.LEVEL: 2,
                     Generic.NAME: {
@@ -126,7 +126,7 @@ class Specialization(CharacterPropertiesInterface):
 
         return cls._specializations.get(key, {})
         
-
+    # TODO complete redesign because of level dependent names
     @classmethod
     def get_all_names(cls) -> dict:
         specialization_dict = {}
@@ -146,7 +146,7 @@ class Specialization(CharacterPropertiesInterface):
     
 
     @classmethod
-    def get_available(cls, profession_key: str, character_level: int) -> dict:
+    def get_available(cls, profession_key: Professions, character_level: int) -> dict:
 
         specialization_dict = {}
 
@@ -154,17 +154,17 @@ class Specialization(CharacterPropertiesInterface):
         if not profession_key:
             specialization_dict["None"] = "Select a profession first"
         else:
-            for s_key in Profession.get_properties(profession_key).get(key.SPECIALIZATION, []):
-                specialization_dict[s_key] = cls._get_name(s_key, character_level)
+            for s_key in Profession.get_properties(profession_key).get(keys.SPECIALIZATION, []):
+                specialization_dict[s_key] = cls.get_name(s_key, character_level)
 
         return specialization_dict
 
 
     @classmethod
-    def _get_name(cls, specialization_key, character_level) -> str:
+    def get_name(cls, specialization_key, character_level) -> str:
         """Helper method
 
-        Returns the name from the given specialization
+        Returns the highest ranking name from the given specialization
         
         :param cls: Description
         :param specialization_key: Description
@@ -176,11 +176,11 @@ class Specialization(CharacterPropertiesInterface):
         name = "Specialization not yet unlocked."
 
         # get the name of the highest unlocked evolution
-        evolution_list = cls.get_properties(specialization_key).get(key.EVOLUTION, [])
+        evolution_list = cls.get_properties(specialization_key).get(keys.EVOLUTION, [])
 
         if evolution_list:
             for evolution in evolution_list:
-                if character_level > evolution.get(Statistics.LEVEL):
+                if character_level >= evolution.get(Statistics.LEVEL):
                     name = evolution.get(Generic.NAME)[GeneralConfig.language()]
         else:
             logging.warning(f"Could not retrieve a list of the evolution steps for the specialization with the key {specialization_key}.")

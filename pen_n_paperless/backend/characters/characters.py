@@ -10,13 +10,14 @@ from sqlalchemy import  Enum,\
                         String,\
                         Integer,\
                         Text,\
-                        PickleType
+                        PickleType,\
+                        ForeignKey
                         
 from sqlalchemy.orm import  relationship,\
                             Mapped,\
                             mapped_column
 
-
+from flask import flash
 
 # internal imports
 from pen_n_paperless import db
@@ -25,13 +26,21 @@ from pen_n_paperless.common.keys import get_enum_values,\
                                         Generic,\
                                         Tribes, \
                                         Professions, \
-                                        Specializations
+                                        Specializations,\
+                                        Armour,\
+                                        Weapons
 
-                                        
+from pen_n_paperless.config.character import CharacterConfig    
+from pen_n_paperless.config.general import GeneralConfig      
 
 from .attributes import Attributes
 from .history import History
 
+from .avatars import Avatar
+
+from pen_n_paperless.content.characters.tribe import Tribe
+from pen_n_paperless.content.characters.profession import Profession
+from pen_n_paperless.content.characters.specialization import Specialization
 
 class Character(db.Model):
     __tablename__ = "table_characters"
@@ -39,6 +48,9 @@ class Character(db.Model):
 
     _id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True)
     _name: Mapped[str] = mapped_column(String(100), default="")
+
+    # Avatar
+    _avatar = None
 
     # Tribe, Profession and Specialization
     _tribe: Mapped[Tribes] = mapped_column(Enum(Tribes, values_callable=get_enum_values), nullable=True, default=None)
@@ -50,13 +62,13 @@ class Character(db.Model):
     _max_hp: Mapped[int] = mapped_column(Integer, default=100)
 
     # Attributes - one-to-one relationship
-    _attributes: Mapped['Attributes'] = relationship(back_populates='_character')
+    _attributes: Mapped["Attributes"] = relationship("Attributes", back_populates='_character', uselist=False)
 
     # Abilities
     # TODO: Abilities instance
 
     # Armour
-    _defense_bonus: Mapped[int] = mapped_column(Integer, default=0)
+    # _defense_bonus: Mapped[int] = mapped_column(Integer, default=0)
     _equipped_armour: Mapped[List] = mapped_column(MutableList.as_mutable(PickleType), default=list)
 
     # Weapons
@@ -68,13 +80,20 @@ class Character(db.Model):
     # HP and XP history
     # HP history is element 0, XP history is element 1
     # associate the history table in a many-to-one relationship
-    _histories: Mapped[List[History]] = relationship(back_populates='_character')
+    _histories: Mapped[List[History]] = relationship("History", back_populates='_character')
 
 
 # -------------------------------------------------------------------------------
 
     def __init__(self, display_name: str) -> None:
         self._name = display_name
+        self._attributes = Attributes()
+        self._histories.append(History("HP"))
+        self._histories.append(History("XP"))
+
+        self._equipped_armour = [Armour.ARMOUR] * CharacterConfig.max_armour_sets()
+        self._equipped_weapons = [Weapons.WEAPON] * CharacterConfig.max_number_of_weapons()
+
         return
 
     def __str__(self) -> str:
@@ -96,6 +115,14 @@ class Character(db.Model):
     #     self._name = new_display_name
     #     db.session.commit()
     #     return
+
+    # Avatar
+    @property
+    def avatar(self) -> Avatar | None:
+        if self._avatar is None:
+            self._avatar = Avatar(self.id, self.name)
+
+        return self._avatar
     
     # Tribe, Profession and Specialization
     @property
@@ -139,25 +166,23 @@ class Character(db.Model):
         }
     # when setting attributes, call _update_max_hp, _update_attribute_bonuses
 
-    # Abilities
-
     # Armour
     # @property
     # def defense_bonus(self) -> int:
     #     return self._defense_bonus
-    # @property
-    # def equipped_arrmour(self) -> list:
-    #     return self._equipped_armour
+    @property
+    def equipped_armour(self) -> list:
+        return self._equipped_armour
     
     # # Weapons
-    # @property
-    # def equipped_weapons(self) -> list:
-    #     return self._equipped_weapons
+    @property
+    def equipped_weapons(self) -> list:
+        return self._equipped_weapons
     
     # Notes
-    # @property
-    # def notes(self) -> str:
-    #     return self._notes
+    @property
+    def notes(self) -> str:
+        return self._notes
 
     # Histories
     @property
@@ -166,6 +191,8 @@ class Character(db.Model):
     @property
     def xp_history(self) -> History:
         return self._histories[1]
+
+    # Abilities
 
 
 # -------------------------------------------------------------------------------

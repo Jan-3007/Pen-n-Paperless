@@ -4,10 +4,12 @@
 
 # Python module imports
 import logging
+import typing
 
 from flask import flash
 from sqlalchemy import  Integer,\
-                        ForeignKey
+                        ForeignKey,\
+                        UniqueConstraint
 
 from sqlalchemy.orm import  relationship,\
                             Mapped,\
@@ -20,21 +22,22 @@ from pen_n_paperless import db
 from pen_n_paperless.config.character import CharacterConfig
 from pen_n_paperless.common.keys import Attributes as key
 
-# uncomment import at bottom of characters.py in case of cyclic import
-from .characters import Character
+# prevent cyclic import
+if typing.TYPE_CHECKING:
+    from .characters import Character
 
 
 
 
-
-class Attributes():
+class Attributes(db.Model):
     __tablename__ = "table_attributes"
+    # __table_args__ = (UniqueConstraint("_character_id"),)
 
     _id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True)
 
     # associate the character table in a one-to-one relationship
     _character_id: Mapped[int] = mapped_column(ForeignKey("table_characters._id"))
-    _character: Mapped['Character'] = relationship(back_populates='_attributes', single_parent=True)
+    _character: Mapped["Character"] = relationship("Character", back_populates='_attributes')
 
 
     # Members

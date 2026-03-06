@@ -1,11 +1,11 @@
 # Python module imports
-from enum import Enum, auto
+
 
 # internal module imports
+from pen_n_paperless.common.keys import Key
 
 
-
-class Language(Enum):
+class Language(Key):
     """Enum containing all supported languages
 
     For a full list of language codes see e.g.:

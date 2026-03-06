@@ -159,7 +159,19 @@ class Profession(CharacterPropertiesInterface):
         return profession_dict
 
 
+    @classmethod
+    def get_name(cls, profession_key) -> str:
+        """returns the language-dependent name of the tribe"""
 
+        profession_name = cls.get_properties(profession_key).get(Generic.NAME)
+        if not profession_name:
+            logging.warning(f"Tribe with key '{profession_key}' has no entry for key {Generic.NAME}")
+            return "Error"
+        
+        return profession_name.get(GeneralConfig.language(), "Error")
+    
+
+    
     # @classmethod
     # def get_specializations(cls, profession_key) -> dict:
     #     """Returns all specializations available for a specific profession"""

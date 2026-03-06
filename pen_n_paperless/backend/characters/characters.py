@@ -198,11 +198,156 @@ class Character(db.Model):
 # -------------------------------------------------------------------------------
 
     # public methods
+    def edit(self, received_data: dict) -> dict:
+        """Change data of a Character instance
+
+        The data can contain one or more key-value-pairs. A key specifies the attribute whose value is to be changed.
+        For example:
+        {
+            Generic.NOTES : "Hello World"
+        }
+
+        :param new_data: The key with the data to be changed.
+        :type new_data: dict
+        :return: Returns a dict with data for immediate UI updates or if the webpage should be fully reloaded.
+        :rtype: dict
+        """
+
+        # collect updated values to return to the client for immediate UI update
+        data_to_send = {}
+        # set default values
+        data_to_send.setdefault('reload', False)
+        data_to_send.setdefault('status', 'error')
+        
+        success = False
+
+        for key in received_data.keys():
+            # the key will be the value of the enum entry, see common/keys and common/pyjs_shared_enums
+
+            if key == Generic.NOTES.value:
+                new_notes = received_data.get(key, '')
+                self._notes = new_notes
+                success = True
+                logging.debug(f'Changed data in notes to "{new_notes[0:10]}..."')
+                # no need to send data back, input field stores the latest data
+
+            elif key == Tribes.TRIBE.value:
+                data = received_data.get(key, {})
+                data_key = data.get('key', '')
+                data_value = data.get('value', '')
+
+                try:
+                    data_key = Tribes(data_key)
+                except ValueError as e:
+                    logging.error(f'key {key} is invalid, exc: {e}')
+                    flash(f'Internal error', 'error')
+                    break
+                success = self._edit_tribe(data_key, data_value)
+
+                data_to_send[key] = {
+                    "key": self.tribe,
+                    "value": Tribe.get_name(self.tribe)
+                }
+
+            elif key == Professions.PROFESSION.value:
+                data = received_data.get(key, {})
+                data_key = data.get('key', '')
+                data_value = data.get('value', '')
+
+                try:
+                    data_key = Professions(data_key)
+                except ValueError as e:
+                    logging.error(f'key {key} is invalid, exc: {e}')
+                    flash(f'Internal error', 'error')
+                    break
+                success = self._edit_profession(data_key, data_value)
+
+                data_to_send[key] = {
+                    "key": self.profession,
+                    "value": Profession.get_name(self.profession)
+                }
+
+            elif key == Specializations.SPECIALIZATION.value:
+                data = received_data.get(key, {})
+                data_key = data.get('key', '')
+                data_value = data.get('value', '')
+
+                try:
+                    data_key = Specializations(data_key)
+                except ValueError as e:
+                    logging.error(f'key {key} is invalid, exc: {e}')
+                    flash(f'Internal error', 'error')
+                    break
+                success = self._edit_specialization(data_key, data_value)
+
+                data_to_send[key] = {
+                    "key": self.specialization,
+                    "value": Specialization.get_name(self.specialization, self.level)
+                }
+
+            else:
+                # stop proccessing as soon as a key cannot be found
+                success = False
+                logging.error(f'key {key} is invalid')
+                flash(f'Internal error', 'error')
+                break
+
+
+        if success == True:
+            # all data has been processed successfully, commit and overwrite defaults
+            db.session.commit()
+            data_to_send.update({'status' : 'success'})
+
+        return data_to_send
+        
 
 
     # private methods
+    def _edit_tribe(self, tribe_key: Tribes, tribe_name: str = '') -> bool:
 
+        if tribe_key not in Tribe.get_all():
+            logging.error(f'Tribe key {tribe_key} is invalid')
+            flash(f'Internal error', 'error')
+            return False
 
+        self._tribe = tribe_key
+        logging.debug(f'Changed tribe to "{tribe_name if tribe_name else Tribe.get_properties(tribe_key).get(Generic.NAME, 'error')}"')
+
+        # _update_attribute_bonuses()
+        # _update_defense_bonus()
+        return True
+    
+    def _edit_profession(self, profession_key: Professions, profession_name: str = '') -> bool:
+
+        if profession_key not in Profession.get_all():
+            logging.error(f'Profession key {profession_key} is invalid')
+            flash(f'Internal error', 'error')
+            return False
+
+        self._profession = profession_key
+        # delete specialization if the profession has been changed
+        # counts as deleted as long as it is not a distinct specialization
+        self._specialization = Specializations.SPECIALIZATION
+        logging.debug(f'Changed profession to "{profession_name if profession_name else Tribe.get_properties(profession_key).get(Generic.NAME, {}).get(GeneralConfig.language(), 'error')}"')
+
+        # _update_max_hp()
+        # _update_attribute_bonuses()
+        # _update_defense_bonuses()
+        return True
+
+    def _edit_specialization(self, specialization_key: Specializations, specialization_name: str = '') -> bool:
+
+        if specialization_key not in Specialization.get_available(self.profession, self.level).keys():
+            logging.error(f'Specialization key {specialization_key} is invalid. Specialization may not be unlocked yet.')
+            flash(f'Internal error', 'error')
+            return False
+
+        self._specialization = specialization_key
+        logging.debug(f'Changed specialization to "{specialization_name if specialization_name else Specialization.get_properties(specialization_key).get(Generic.NAME, {}).get(GeneralConfig.language(), 'error')}"')
+
+        # _update_attribute_bonuses()
+        # _update_defense_bonus()
+        return True
 # -------------------------------------------------------------------------------
 
 # global helper functions
@@ -276,7 +421,6 @@ def create_character(name: str) -> Character | None:
     db.session.commit()
     
     if character_exists(c.id):
-        logging.info(f'New character created. \n \t {c.name}: "{c}"')
         return c
     else:
         logging.error(f'Error while trying to create a new character "{name}"".')
@@ -313,7 +457,3 @@ def delete_character(character_id: int) -> bool:
 
     return success
 
-
-# this import is only so that Character is available in the Attributes class
-# a direct include in attribute.py would mean a cyclic import
-# from .attribute import Attributes

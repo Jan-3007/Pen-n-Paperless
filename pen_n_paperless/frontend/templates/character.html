@@ -4,33 +4,46 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<meta name="Pen'n'Paperless">
+		<meta name="application-name" content="Pen'n'Paperless">
+		<meta name="description" content="Character overview">
+		<meta name="author" content="{{ character.name }}">
 		<title>
 			{{ character.name }} — Overview
 		</title>
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+		<!-- Required, otherwise browser will send a request for the favicon.ico -->
+		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+		<script src="{{ url_for('static', filename='js/enums.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/editor.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/editor.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/dropdown.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/avatar.js') }}"></script>
 	</head>
 
-	<body>
+	<!-- the data-... elements are called from js, they are automatically converted to camelCase -->
+	<body
+		onload="setOptPlaceholder()"
+
+		data-edit-character-url="{{ url_for('edit', character_name = character.name) }}" 
+		>
 		<div class="container">
 			<div class="card">
 
 				<header style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
 					<div>
-						<h1 id="character_name">{{ character.name }}</h1>
+						<h1>{{ character.name }}</h1>
+						<p hidden id="character_name">{{ character.name }}</p>
 					</div>
 					<!-- move the logout button to the top of the page, left of the navigation bar -->
 					<div>
 						<form method="post" action="{{ url_for('logout') }}" style="display:inline">
-							<button type="submit" class="danger">Logout</button>
+							<button class="danger">Logout</button>
 						</form>
 					</div>
 				</header>
 			
-				<!-- import javascript -->
-				{% set flashed = get_flashed_messages(with_categories=True) %}
-				<script id="flashed-data" type="application/json">{{ flashed|tojson }}</script>
-
 				<hr>
 
 				<!-- card containing most important character properties -->
@@ -86,9 +99,8 @@
 
 
 				<h2>Character Attributes</h2>
-				
 				<div class="grid">
-					{% if character.attributes && character.attribute_bonuses %}
+					<!-- {% if character.attributes and character.attribute_bonuses %} -->
 					<div class="card">
 							<table class="attributes">
 								<thead>
@@ -103,55 +115,55 @@
 										<td>Endurance</td>
 										<td>
 											{% set val_endurance = character.attributes.get(keys.Attributes.ENDURANCE, -1) %}
-											<span id="prop-{{ Strings.Attributes.endurance.value }}">{{ val_endurance }}</span>
+											<span id="prop-{{ keys.Attributes.ENDURANCE }}">{{ val_endurance }}</span>
 										</td>
 										<td>
 											{% set val_endurance_bonus = character.attribute_bonuses.get(keys.Attributes.ENDURANCE_BONUS, -1) %}
-											<span id="prop-{{ Strings.Attributes.endurance_bonus.value }}">{{ val_endurance_bonus }}</span>
+											<span id="prop-{{ keys.Attributes.ENDURANCE_BONUS }}">{{ val_endurance_bonus }}</span>
 										</td>
 									</tr>
 									<tr>
 										<td>Strength</td>
 										<td>
 											{% set val_strength = character.attributes.get(keys.Attributes.STRENGTH, -1) %}
-											<span id="prop-{{ Strings.Attributes.strength.value }}">{{ val_strength }}</span>
+											<span id="prop-{{ keys.Attributes.STRENGTH }}">{{ val_strength }}</span>
 										</td>
 										<td>
 											{% set val_strength_bonus = character.attribute_bonuses.get(keys.Attributes.STRENGTH_BONUS, -1) %}
-											<span id="prop-{{ Strings.Attributes.strength_bonus.value }}"> {{ val_strength_bonus }}</span>
+											<span id="prop-{{ keys.Attributes.STRENGTH_BONUS }}"> {{ val_strength_bonus }}</span>
 										</td>
 									</tr>
 									<tr>
 										<td>Dexterity</td>
 										<td>
 											{% set val_dexterity = character.attributes.get(keys.Attributes.DEXTERITY, -1) %}
-											<span id="prop-{{ Strings.Attributes.dexterity.value }}">{{ val_dexterity }}</span>
+											<span id="prop-{{ keys.Attributes.DEXTERITY }}">{{ val_dexterity }}</span>
 										</td>
 										<td>
 											{% set val_dexterity_bonus = character.attribute_bonuses.get(keys.Attributes.DEXTERITY_BONUS, -1) %}
-											<span id="prop-{{ Strings.Attributes.dexterity_bonus.value }}"> {{ val_dexterity_bonus }}</span>
+											<span id="prop-{{ keys.Attributes.DEXTERITY_BONUS }}"> {{ val_dexterity_bonus }}</span>
 										</td>
 									</tr>
 									<tr>
 										<td>Intelligence</td>
 										<td>
 											{% set val_intelligence = character.attributes.get(keys.Attributes.INTELLIGENCE, -1) %}
-											<span id="prop-{{ Strings.Attributes.intelligence.value }}">{{ val_intelligence }}</span>
+											<span id="prop-{{ keys.Attributes.INTELLIGENCE }}">{{ val_intelligence }}</span>
 										</td>
 										<td>
 											{% set val_intelligence_bonus = character.attribute_bonuses.get(keys.Attributes.INTELLIGENCE_BONUS, -1) %}
-											<span id="prop-{{ Strings.Attributes.intelligence_bonus.value }}"> {{ val_intelligence_bonus }}</span>
+											<span id="prop-{{ keys.Attributes.INTELLIGENCE_BONUS }}"> {{ val_intelligence_bonus }}</span>
 										</td>
 									</tr>
 									<tr>
 										<td>Charisma</td>
 										<td>
 											{% set val_charisma = character.attributes.get(keys.Attributes.CHARISMA, -1) %}
-											<span id="prop-{{ Strings.Attributes.charisma.value }}">{{ val_charisma }}</span>
+											<span id="prop-{{ keys.Attributes.CHARISMA }}">{{ val_charisma }}</span>
 										</td>
 										<td>
 											{% set val_charisma_bonus = character.attribute_bonuses.get(keys.Attributes.CHARISMA_BONUS, -1) %}
-											<span id="prop-{{ Strings.Attributes.charisma_bonus.value }}"> {{ val_charisma_bonus }}</span>
+											<span id="prop-{{ keys.Attributes.CHARISMA_BONUS }}"> {{ val_charisma_bonus }}</span>
 										</td>
 									</tr>
 								</tbody>
@@ -159,8 +171,8 @@
 									<tr>
 										<th>Total</th>
 										<th>
-											{% set val_used_attribute_points = character.attribute_points.get(keys.Generic.TOTAL_POINTS, -1) %}
-											<span id="prop-{{ Strings.Attributes.used_attribute_points.value }}"> {{ val_used_attribute_points }}</span>
+											{% set val_total_attribute_points = character.attribute_points.get(keys.Generic.TOTAL_POINTS, -1) %}
+											<span id="prop-{{ keys.Generic.TOTAL_POINTS }}"> {{ val_total_attribute_points }}</span>
 										</th>
 										<th></th>
 									</tr>
@@ -168,16 +180,16 @@
 										<th>Remaining</th>
 										<th>
 											{% set val_remaining_attribute_points = character.attribute_points.get(keys.Generic.REMAINING_POINTS, -1) %}
-											<span id="prop-{{ Strings.Attributes.remaining_attribute_points.value }}"> {{ val_remaining_attribute_points }}</span>
+											<span id="prop-{{ keys.Generic.REMAINING_POINTS }}"> {{ val_remaining_attribute_points }}</span>
 										</th>
 										<th></th>
 									</tr>
 								</tfoot>
 							</table>
 					</div>
-					{% endif %}
+					<!-- {% endif %} -->
 					
-					{% if character.max_hp && character.current_hp %}
+					<!-- {% if character.max_hp and character.current_hp %} -->
 					<div class="card">
 						<table class="history">
 							<thead>
@@ -217,12 +229,8 @@
 							</tfoot>
 						</table>
 					</div>
-					{% endif %}
+					<!-- {% endif %} -->
 				</div>
-
-
-				<!-- all good until here -->
-
 
 
 				<h2>Character Equipment</h2>
@@ -232,24 +240,27 @@
 						<strong>Armour</strong>
 
 						<div class="grid">
-							{% if character.armour %}
+							<!-- {% if character.equipped_armour %} -->
 
-							{% for num_allowed_armour in range(0, max_armour_sets) %}
+							{% for idx in range(0, max_armour_sets) %}
 
-								{% set ch_armour_list = character.armour %}
-								{% set ch_armour_key = ch_armour_list[num_allowed_armour] %}
+								{% set ch_armour_key = character.equipped_armour[idx] %}
 
-								{% if armour_list[ch_armour_key] %}
-									{% set ch_armour_name = armour_list[ch_armour_key] %}
-								{% else %}			
-									{% set ch_armour_name = 'Empty' %}
-								{% endif %}				
+								{% if armour_dict.get(ch_armour_key) %}
+									{% set ch_armour_name = armour_dict.get(ch_armour_key) %}
+								{% else %}
+									{% set ch_armour_name = 'None equipped' %}
+								{% endif %}
 
-									<span style="margin-top:10px; margin-left:10px">
-										{{num_allowed_armour + 1}}: {{ch_armour_name}}
+								{% if loop.first %}
+									<span style="margin-top:10px; margin-left:15px">
+								{% else %}
+									<span style="margin-left:15px">
+								{% endif %}
+										{{idx + 1}}: {{ch_armour_name}}
 									</span>
 							{% endfor %}
-							{% endif %}
+							<!-- {% endif %} -->
 						</div>
 
 					</div>
@@ -259,17 +270,16 @@
 						<strong>Weapons</strong>
 
 							<div class="grid">
-								{% if character.weapons %}
+								<!-- {% if character.equipped_weapons %} -->
 
-								{% for num_allowed_weapon in range(0, max_nb_weapons) %}
+								{% for idx in range(0, max_nb_weapons) %}
 
-									{% set ch_weapon_list = character.weapons %}
-									{% set ch_weapon_key = ch_weapon_list[num_allowed_weapon] %}
+									{% set ch_weapon_key = character.equipped_weapons[idx] %}
 
-									{% if weapon_list[ch_weapon_key] %}
-										{% set ch_weapon_name = weapon_list[ch_weapon_key] %}
+									{% if weapons_dict.get(ch_weapon_key) %}
+										{% set ch_weapon_name = weapons_dict(ch_weapon_key) %}
 									{% else %}			
-										{% set ch_weapon_name = 'Empty' %}
+										{% set ch_weapon_name = 'None equipped' %}
 									{% endif %}				
 
 									{% if loop.first %}
@@ -278,12 +288,12 @@
 										<span style="margin-left:15px">
 									{% endif %}
 
-										{{num_allowed_weapon + 1}}: {{ch_weapon_name}}
+										{{idx + 1}}: {{ch_weapon_name}}
 									</span>
 									<br>
 								
 								{% endfor %}
-								{% endif %}
+								<!-- {% endif %} -->
 							</div>
 
 					</div>
@@ -292,7 +302,7 @@
 
 
 
-
+				<!-- TODO -->
 				<h2>Character Abilities</h2>
 				<div class="grid">
 					<div class="card">
@@ -368,24 +378,22 @@
 
 
 				<h2>Notes</h2>
-				{% if character.notes %}
-				<textarea id="notes" rows="8">{{ character.notes }}</textarea>
+				<textarea id="notes" rows="8" placeholder="Your Notes">{{ character.notes }}</textarea>
 				<br>
 				<button class="save" onclick="saveNotes()">Save Notes</button>
-				{% endif %}
 
 				<hr style="margin-top: 30px">
 
 
 				<h2>Character Experience</h2>
 				<div class="card">
-					{% if character.level && character.experience %}
+					<!-- {% if character.level and character.experience %} -->
 					<table class="history">
 						<thead>
 							<tr>
 								<th>Current level</th>
 								<td>
-									<span id="stat-{{Strings.Statistics.level.value}}">
+									<span id="stat-{{ keys.Statistics.LEVEL }}">
 										{{ character.level }}
 									</span>
 								</td>
@@ -407,7 +415,7 @@
 							<tr>
 								<th>Total experience</th>
 								<td>
-									<span id="stat-{{Strings.Statistics.experience.value}}">
+									<span id="stat-{{ keys.Statistics.EXPERIENCE }}">
 										{{ character.experience }}
 									</span>
 								</td>
@@ -417,7 +425,7 @@
 							
 						</tfoot>
 					</table>
-					{% endif %}
+					<!-- {% endif %} -->
 				</div>
 			</div>
 
@@ -431,8 +439,9 @@
 			</div>
 		</div>
 
+		<script src="{{ url_for('static', filename='js/enums.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
-		<script src="{{ url_for('static', filename='js/editor.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/character.js') }}"></script>
 
 	</body>
 </html>

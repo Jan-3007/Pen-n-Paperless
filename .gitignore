@@ -12,6 +12,9 @@ docs/
 *.jpg
 *.webp
 
+# js enums
+enums.js
+
 # Log files
 *.log
 

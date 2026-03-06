@@ -297,5 +297,135 @@ def editor(character_name: str):
 
 
 
+# call this page with 'url_for('edit', character_name=name)'
+@app.route('/<string:character_name>/edit', methods=['POST'])
+def edit(character_name: str) -> dict:
+    """(route) Character edit request page
+
+    When the user changes a value, the data is sent here to be processed.
+
+    When a user tries to access this page without being logged in they will be send back to main.
+    
+    :param character_name: Name of the character
+    :type character_name: str
+    """
+
+    if request.method != 'POST':
+        logging.error(f'Unexpected request method, got: {request.method}')
+        flash(f'Internal error', 'error')
+        return {'status' : 'error', 'flashed' : get_flashed_messages(with_categories=True)}
+        # return redirect(url_for('main'))
 
 
+    logging.debug(f'retrieving character ID from session')
+    session_char_id = get_active_character_id()
+
+    # User is not logged in as a character
+    if session_char_id == None:
+        logging.error(f'Error while trying to access page: /{character_name}/editor. User not signed in accordingly.')
+        flash("Please sign in first", "error")
+        return {'status' : 'error', 'flashed' : get_flashed_messages(with_categories=True)}
+        # return redirect(url_for('main'))
+
+    # Resolve character from ID
+    character_from_session = get_character_by_id(session_char_id)
+    if character_from_session == None:
+        logging.error(f'Error while resolving character ID.')
+        flash(f'Internal error.', 'error')
+        return {'status' : 'error', 'flashed' : get_flashed_messages(with_categories=True)}
+        # return redirect(url_for('main'))
+
+    
+    # User is logged in, but <character_name> does not match the name retrieved using the ID from the session, not allowed
+    if character_name != character_from_session.name:
+        logging.error(f'User tried to access a character page whilst being logged in as another character. \n\tCharacter ID from session: {character_from_session.id}. \n\tRequested character: "{character_name}"')
+        flash(f'Please log out first.', 'error')
+        return {'status' : 'error', 'flashed' : get_flashed_messages(with_categories=True)}
+        # return redirect(url_for('character_overview', character_name=character_from_session.name))
+
+
+    # get the json data from the html request as a dict
+    new_data = request.get_json() or {}
+    if new_data == {}:
+        logging.error(f'failed to retrieve data from request.')
+        flash(f'Internal error', 'error')
+        return {'status' : 'error', 'flashed' : get_flashed_messages(with_categories=True)}
+
+    # send new data to character
+    update = character_from_session.edit(new_data)
+
+    update['flashed'] = get_flashed_messages(with_categories=True)
+    return update
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# call this page with 'url_for('delete', character_name=name)'
+@app.route('/<string:character_name>/delete')
+def delete(character_name = None):
+
+    logging.debug(f'edit(): retrieving character ID from session')
+    session_char_id = get_active_character_id()
+
+    # User is not logged in as a character
+    if session_char_id == None:
+        logging.error(f'Error while trying to access page: /{character_name}/editor. User not signed in accordingly.')
+        flash("Please sign in first", "error")
+        return redirect(url_for('main'))
+
+    # Resolve character from ID
+    character_from_session = get_character_by_id(session_char_id)
+    if character_from_session == None:
+        logging.error(f'edit(): Error while resolving character ID.')
+        flash(f'Internal error.', 'error')
+        return redirect(url_for('main'))
+    
+    # User is logged in, but <character_name> does not match the name retrieved using the ID from the session, not allowed
+    if character_name != character_from_session.name:
+        logging.error(f'User tried to access a character page whilst being logged in as another character. \n\tCharacter ID from session: {character_from_session.id}. \n\tRequested character: "{character_name}"')
+        flash(f'Please log out first.', 'error')
+        return redirect(url_for('main'))
+
+
+    # remove ID from session
+    session.pop(keys.Generic.ID.value, None)
+
+    # TODO: overkill?
+    char_id = session.get(keys.Generic.ID.value, None)
+    if char_id is not None:
+        logging.error(f'delete(): Error while deleting a character. Failed to remove character with ID {session_char_id} from session.')
+        flash(f'Internal error.', 'error')
+        return redirect(url_for('main'))
+
+    # delete character from db
+    success = delete_character(session_char_id)
+    if not success:
+        logging.error(f'delete(): Error while deleting a character. Failed to remove character with ID {session_char_id} from database.')
+        flash(f'Internal error', 'error')
+        return redirect(url_for('main'))
+    
+    logging.info(f'delete(): Successfully deleted character with ID: {session_char_id}.')
+    flash(f'Character deleted successfully', 'success')
+    return redirect(url_for('main'))
+
+
+
+
+# favico.ico for older browsers
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(
+        os.path.join(app.root_path, 'static'),
+        'favicon.ico',
+        mimetype='image/vnd.microsoft.icon'
+    )

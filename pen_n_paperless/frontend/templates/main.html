@@ -9,9 +9,20 @@
             {{ world_name }}
         </title>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
+		<!-- Required, otherwise browser will send a request for the favicon.ico -->
+		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+        <script src="{{ url_for('static', filename='js/enums.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/editor.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/editor.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/dropdown.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/avatar.js') }}"></script>
     </head>
 
-    <body>
+    <body
+        onload="setOptPlaceholder()"
+        >
         <div class="container">
 
             <header style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
@@ -56,7 +67,7 @@
                 {% if character_dict %}
                 <div class="grid" style="width: max-content;">
 
-                    {% for ch_name, ch_url in character_dict.items() %}
+                    {% for ch_name, avatar_url in character_dict.items() %}
                     <div class="card">
                         <div class="avatar-wrapper">
 
@@ -69,10 +80,10 @@
                                 </form>
                             </div>
 
-                            {% if ch_url %}
+                            {% if avatar_url %}
                             <div class="avatar-image">
                                 <picture>
-                                    <img src="{{ ch_url }}" alt="avatar" class="avatar">
+                                    <img src="{{ avatar_url }}" alt="avatar" class="avatar">
                                 </picture>
                             </div>
                             {% endif %}

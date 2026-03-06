@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="{{language}}">
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="application-name" content="Pen'n'Paperless">
+		<meta name="description" content="Character editor">
+		<meta name="author" content="{{ character.name }}">
+		<title>
+			{{ character.name }} — Editor
+		</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+		<!-- Required, otherwise browser will send a request for the favicon.ico -->
+		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+		<script src="{{ url_for('static', filename='js/enums.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/editor.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/editor.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/dropdown.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/avatar.js') }}"></script>
+	</head>
+
+	<!-- the data-... elements are called from js, they are automatically converted to camelCase -->
+	<body 
+		onload="setOptPlaceholder()"
+
+		data-edit-character-url="{{ url_for('edit', character_name = character.name) }}" 
+		data-upload-avatar-url="{{ url_for('upload_avatar', character_name = character.name) }}"
+		data-delete-avatar-url="{{ url_for('delete_avatar', character_name = character.name) }}"
+		>
+		<div class="container">
+			<div class="card">
+
+				<header style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+					<div style="display:flex; align-items:center; gap:12px;">
+						<h1>Character editor</h1>
+						<p hidden id="character_name">{{ character.name }}</p>
+					</div>
+
+					<div>
+						<form method="get" action="{{ url_for('character_overview', character_name=character.name) }}" style="display:inline">
+							<button>Done</button>
+						</form>
+					</div>
+				</header>
+			
+				<hr>
+
+				<h2>Upload avatar</h2>
+
+				<div class="card">
+					<div class="avatar-wrapper">
+						<div class="avatar-image">
+                            <picture>
+								<img 	src="{{ avatar_url if avatar_url else '#' }}" 
+										alt="avatar" 
+										class="avatar" 
+										width="{{ avatar_dimensions[0] }}"
+										height="{{ avatar_dimensions[1] }}"
+										>
+                            </picture>
+						</div>
+						<div class="avatar-options">
+							<form 	id="avatar-form" 
+									method="post"  
+									enctype="multipart/form-data">
+								<label for="avatar">Choose an image ({{ character.avatar.supported_file_types }})</label>
+								<input 	id="avatar" 
+										name="avatar" 
+										type="file" 
+										accept="image/*">
+								<!-- needs to be submit to trigger the form -->
+								<button type="button" 
+										onclick="uploadAvatar(this.form)" 
+										class="upload" 
+										style="margin-top: 20px">
+										Upload
+								</button>
+								<!-- must be of type button so not to trigger the from -->
+								<button type="button" 
+										onclick="deleteAvatar(this.form)"
+										class="danger" 
+										id="delete-avatar" 
+										style="margin-left:15px">
+										Delete avatar
+								</button>
+							</form>
+						</div>
+					</div>
+				</div>
+
+				<h2>Character Properties</h2>
+				<div class="grid">
+					
+					<div class="card">
+						<strong>Tribe:</strong><br>
+
+						<div class="dropdown" id="tribe-list">
+
+							{% if character.tribe in tribe_dict.keys() %}
+								{% set ch_tribe_name = tribe_dict.get(character.tribe) %}
+							{% else %}
+								{% set ch_tribe_name = 'None selected' %}
+							{% endif %}	
+
+							<button class="dropbtn" 
+									id="dropbtn-tribe"
+									onclick="onDropdownSelect('tribe')">
+										{{ ch_tribe_name }}
+							</button>
+							<div class="dropdown-content" id="listDropdown-tribe">
+								{% for tribe_key in tribe_dict.keys() %}
+								<button class="dropdown-element save-prop" 
+										onclick="closeDropdown()"
+										data-category="{{ keys.Tribes.TRIBE }}" 
+										data-key="{{ tribe_key }}" 
+										data-value="{{ tribe_dict.get(tribe_key) }}">
+											{{ tribe_dict.get(tribe_key) }}
+								</button>
+								{% endfor %}
+							</div>
+						</div>
+					</div>
+	
+					<div class="card">
+						<strong>Profession:</strong><br>
+
+						<div class="dropdown" id="profession-list">
+
+							{% if character.profession in profession_dict %}
+								{% set ch_profession_name = profession_dict.get(character.profession) %}
+							{% else %}			
+								{% set ch_profession_name = 'None selected' %}
+							{% endif %}				
+
+							<button class="dropbtn" 
+									id="dropbtn-profession"
+									onclick="onDropdownSelect('profession')">
+										{{ ch_profession_name }}
+							</button>
+							<div class="dropdown-content" id="listDropdown-profession">
+								{% for profession_key in profession_dict.keys() %}
+								<button class="dropdown-element save-prop" 
+										data-category="{{ keys.Professions.PROFESSION }}" 
+										data-key="{{ profession_key }}" 
+										data-value="{{ profession_dict.get(profession_key) }}">
+											{{ profession_dict.get(profession_key) }}
+								</button>
+								{% endfor %}
+							</div>
+						</div>
+					</div>
+
+					<div class="card">
+						<strong>Specialization:</strong><br>
+
+						<div class="dropdown" id="specialization-list">
+
+							{% if character.specialization in specialization_dict.keys() %}
+								{% set ch_specialization_name = specialization_dict.get(character.specialization) %}
+							{% else %}
+								{% set ch_specialization_name = 'None selected' %}
+							{% endif %}				
+							
+							<button class="dropbtn"
+									id="dropbtn-specialization"
+									onclick="onDropdownSelect('specialization')">
+										{{ ch_specialization_name }}
+							</button>
+							<div class="dropdown-content" id="listDropdown-specialization">
+								{% for specialization_key in specialization_dict.keys() %}
+								<!-- prevent user from sending a specialization placeholder to the server -->
+								{% if specialization_key in keys.Specializations %}
+								<button class="dropdown-element save-prop" 
+								{% else %}
+								<button class="dropdown-element" 
+								{% endif %}
+										data-category="{{ keys.Specializations.SPECIALIZATION }}" 
+										data-key="{{ specialization_key }}" 
+										data-value="{{ specialization_dict.get(specialization_key) }}">
+											{{ specialization_dict.get(specialization_key) }}
+								</button>
+								{% endfor %}
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+
+
+				<h2>Character Attributes</h2>
+				<div class="grid">
+					{% if character.attributes %}
+					<div class="card">
+							<table class="attributes">
+								<thead>
+									<tr>
+										<th>Attribute</th>
+										<th>Value</th>
+										<th>Bonus</th>
+									</tr>
+								</thead>
+								<tbody
+									<tr>
+										<td>Endurance</td>
+										<td>
+											{% set val_endurance = character.attributes.get(keys.Attributes.ENDURANCE, -1) %}
+											<button class="add save-prop" 
+													data-category=""
+													data-key="{{ keys.Attributes.ENDURANCE }}" 
+													data-value="1">+1</button>
+											<span id="prop-{{ keys.Attributes.ENDURANCE }}">{{ val_endurance }}</span>
+											<button class="subtract save-prop" 
+													data-category=""
+													data-key="{{ keys.Attributes.ENDURANCE }}" 
+													data-value="-1">-1</button>
+										</td>
+										<td>
+											{% set val_endurance_bonus = character.attribute_bonuses.get(keys.Attributes.ENDURANCE_BONUS, -1) %}
+											<span id="prop-{{ keys.Attributes.ENDURANCE_BONUS }}">{{ val_endurance_bonus }}</span>
+										</td>
+									</tr>
+									<tr>
+										<td>Strength</td>
+										<td>
+											{% set val_strength = character.attributes.get(keys.Attributes.STRENGTH, -1) %}
+											<button class="add save-prop" data-key="{{ keys.Attributes.STRENGTH }}" data-value="1">+1</button>
+											<span id="prop-{{ keys.Attributes.STRENGTH }}">{{ val_strength }}</span>
+											<button class="subtract save-prop" data-key="{{ keys.Attributes.STRENGTH }}" data-value="-1">-1</button>
+										</td>
+										<td>
+											{% set val_strength_bonus = character.attribute_bonuses.get(keys.Attributes.STRENGTH_BONUS, -1) %}
+											<span id="prop-{{ keys.Attributes.STRENGTH_BONUS }}"> {{ val_strength_bonus }}</span>
+										</td>
+									</tr>
+									<tr>
+										<td>Dexterity</td>
+										<td>
+											{% set val_dexterity = character.attributes.get(keys.Attributes.DEXTERITY, -1) %}
+											<button class="add save-prop" data-key="{{ keys.Attributes.DEXTERITY }}" data-value="1">+1</button>
+											<span id="prop-{{ keys.Attributes.DEXTERITY }}">{{ val_dexterity }}</span>
+											<button class="subtract save-prop" data-key="{{ keys.Attributes.DEXTERITY }}" data-value="-1">-1</button>
+										</td>
+										<td>
+											{% set val_dexterity_bonus = character.attribute_bonuses.get(keys.Attributes.DEXTERITY_BONUS, -1) %}
+											<span id="prop-{{ keys.Attributes.DEXTERITY_BONUS }}"> {{ val_dexterity_bonus }}</span>
+										</td>
+									</tr>
+									<tr>
+										<td>Intelligence</td>
+										<td>
+											{% set val_intelligence = character.attributes.get(keys.Attributes.INTELLIGENCE, -1) %}
+											<button class="add save-prop" data-key="{{ keys.Attributes.INTELLIGENCE }}" data-value="1">+1</button>
+											<span id="prop-{{ keys.Attributes.INTELLIGENCE }}">{{ val_intelligence }}</span>
+											<button class="subtract save-prop" data-key="{{ keys.Attributes.INTELLIGENCE }}" data-value="-1">-1</button>
+										</td>
+										<td>
+											{% set val_intelligence_bonus = character.attribute_bonuses.get(keys.Attributes.INTELLIGENCE_BONUS, -1) %}
+											<span id="prop-{{ keys.Attributes.INTELLIGENCE_BONUS }}"> {{ val_intelligence_bonus }}</span>
+										</td>
+									</tr>
+									<tr>
+										<td>Charisma</td>
+										<td>
+											{% set val_charisma = character.attributes.get(keys.Attributes.CHARISMA, -1) %}
+											<button class="add save-prop" data-key="{{ keys.Attributes.CHARISMA }}" data-value="1">+1</button>
+											<span id="prop-{{ keys.Attributes.CHARISMA }}">{{ val_charisma }}</span>
+											<button class="subtract save-prop" data-key="{{ keys.Attributes.CHARISMA }}" data-value="-1">-1</button>
+										</td>
+										<td>
+											{% set val_charisma_bonus = character.attribute_bonuses.get(keys.Attributes.CHARISMA_BONUS, -1) %}
+											<span id="prop-{{ keys.Attributes.CHARISMA_BONUS }}"> {{ val_charisma_bonus }}</span>
+										</td>
+									</tr>
+								</tbody>
+								<tfoot>
+									<tr>
+										<th>Total</th>
+										<th>
+											{% set val_total_attribute_points = character.attribute_points.get(keys.Generic.TOTAL_POINTS, -1) %}
+											<span id="prop-{{ keys.Generic.TOTAL_POINTS }}"> {{ val_total_attribute_points }}</span>
+										</th>
+										<th></th>
+									</tr>
+									<tr>
+										<th>Remaining</th>
+										<th>
+											{% set val_remaining_attribute_points = character.attribute_points.get(keys.Generic.REMAINING_POINTS, -1) %}
+											<span id="prop-{{ keys.Generic.REMAINING_POINTS }}"> {{ val_remaining_attribute_points }}</span>
+										</th>
+										<th></th>
+									</tr>
+								</tfoot>
+							</table>
+					</div>
+					{% endif %}
+
+					<!-- {% if character.max_hp and character.current_hp %} -->
+					<div class="card">
+						<table class="history">
+							<thead>
+								<tr>
+									<th>Max HP</th>
+									<td>
+										<span id="stat-{{ keys.Statistics.MAX_HP }}">
+											{{ character.max_hp }}
+										</span>
+									</td>
+									<td></td>
+									<td></td>
+								</tr>
+							</thead>
+							<tbody>
+								{% for hp_entry in character.hp_history.get_entries() %}
+									<tr>
+										<td></td>
+										<td>{{ hp_entry.value }}</td>
+										<td>{{ hp_entry.description }}</td>
+										<td>
+											<button class="danger remove-entry" 
+													data-category="{{ keys.History.HP_HISTORY }}" 
+													data-key="{{ keys.History.ENTRY_NUMBER }}"
+													data-value="{{ hp_entry.id }}">Remove</button>
+										</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+							<tfoot>
+								<tr>
+									<th>Current HP</th>
+									<td>
+										<span id="stat-{{keys.Statistics.CURRENT_HP}}">
+											{{ character.current_hp }}
+										</span>
+									</td>
+									<td></td>
+									<td></td>
+								</tr>
+								
+							</tfoot>
+						</table>
+
+						<table class="add-entry">
+							<thead>
+								<tr>
+									<th>Add</th>
+									<td></td>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>
+										<textarea id="add-entry-desc-{{ keys.History.HP_HISTORY }}" 
+												rows="1" 
+												placeholder="Description"></textarea>
+									</td>
+									<td>
+										<textarea id="add-entry-value-{{ keys.History.HP_HISTORY }}" 
+												rows="1" 
+												placeholder="Value"></textarea>
+									</td>
+								</tr>
+							</tbody>
+						</table>	
+						<button class="save" onclick='addEntry("{{ keys.History.HP_HISTORY }}")'>Save</button>
+					</div>
+					{% endif %}
+				</div>
+
+				<h2>Character Experience</h2>
+				<div class="card">
+					{% if character.xp_history %}
+					<table class="history">
+						<thead>
+							<tr>
+								<th>Current level</th>
+								<td>
+									<span id="stat-{{ keys.Statistics.LEVEL }}">
+										{{ character.level }}
+									</span>
+								</td>
+								<td></td>
+								<td></td>
+							</tr>
+						</thead>
+						<tbody>
+							{% for xp_entry in character.xp_history.get_entries() %}
+								<tr>
+									<td></td>
+									<td>{{ xp_entry.value }}</td>
+									<td>{{ xp_entry.description }}</td>
+									<td>
+										<button class="danger remove-entry" 
+												data-category="{{ keys.History.XP_HISTORY }}" 
+												data-key="{{ keys.History.ENTRY_NUMBER }}"
+												data-value="{{ xp_entry.id }}">Remove</button>
+									</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+						<tfoot>
+							<tr>
+								<th>Total experience</th>
+								<td>
+									<span id="stat-{{ keys.Statistics.EXPERIENCE }}">
+										{{ character.experience }}
+									</span>
+								</td>
+								<td></td>
+								<td></td>
+							</tr>
+							
+						</tfoot>
+					</table>
+					<table class="add-entry">
+						<thead>
+							<tr>
+								<th>Add</th>
+								<td></td>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>
+									<textarea id="add-entry-desc-{{ keys.History.XP_HISTORY }}" 
+											rows="1" 
+											placeholder="Description"></textarea>
+								</td>
+								<td>
+									<textarea id="add-entry-value-{{ keys.History.XP_HISTORY }}" 
+											rows="1" 
+											placeholder="Value"></textarea>
+								</td>
+							</tr>
+						</tbody>
+					</table>	
+					<button class="save" onclick='addEntry("{{ keys.History.XP_HISTORY }}")'>Save</button>
+					{% endif %}
+				</div>
+
+
+
+				<h2>Character Equipment</h2>
+				<div class="grid">
+					<div class="card">
+
+						<strong>Armour</strong>
+
+						<div class="grid">
+							<!-- {% if character.equipped_armour %} -->
+
+							{% for idx in range(0, max_armour_sets) %}
+
+								{% set ch_armour_key = character.equipped_armour[idx] %}
+
+								{% if armour_dict.get(ch_armour_key) %}
+									{% set ch_armour_name = armour_dict.get(ch_armour_key) %}
+								{% else %}
+									{% set ch_armour_name = 'None equipped' %}
+								{% endif %}
+
+								<div id="armour-{{ idx }}" class="dropdown">
+
+									<button onclick="onDropdownSelect('armour')" 
+											class="dropbtn">{{idx + 1}}: {{ch_armour_name}}</button>
+									<div id="listDropdown-armour" class="dropdown-content">
+										{% for armour_key in armour_dict.keys() %}
+										<button class="dropdown-element save-prop" 
+												data-category="{{ keys.Armour.ARMOUR }}" 
+												data-key="{{ armour_key }}" 
+												data-value="{{ armour_dict.get(armour_name) }}">{{ armour_dict.get(armour_name) }}</button>
+										{% endfor %}
+									</div>
+								</div>
+
+							{% endfor %}
+							<!-- {% endif %} -->
+						</div>
+
+					</div>
+
+					<div class="card">
+
+						<strong>Weapons</strong>
+
+							<div class="grid">
+								<!-- {% if character.equipped_weapons %} -->
+
+								{% for idx in range(0, max_nb_weapons) %}
+
+									{% set ch_weapon_key = character.equipped_weapons[idx] %}
+
+									{% if weapons_dict.get(ch_weapon_key) %}
+										{% set ch_weapon_name = weapons_dict.get(ch_weapon_key) %}
+									{% else %}			
+										{% set ch_weapon_name = 'None equipped' %}
+									{% endif %}
+
+									<div id="weapon-{{ idx }}" class="dropdown">
+
+										<button onclick="onDropdownSelect('weapon')" 
+												class="dropbtn">{{idx + 1}}: {{ch_weapon_name}}</button>
+										<div id="listDropdown-weapon" class="dropdown-content">
+											{% for weapon_key in weapons_dict.keys() %}
+												<button class="dropdown-element save-prop" 
+														data-category="{{ keys.Weapons.WEAPON }}" 
+														data-value="{{ weapon_key }}" 
+														data-display="{{ weapons_dict.get(weapon_key) }}">{{ weapons_dict.get(weapon_key) }}</button>
+											{% endfor %}
+										</div>
+									</div>
+
+								{% endfor %}
+								<!-- {% endif %} -->
+							</div>
+
+					</div>
+				</div>
+					
+
+
+
+
+				<!-- TODO -->
+				<h2>Character Abilities</h2>
+				<div class="grid">
+					<div class="card">
+						<strong>
+							Max ability points: 
+						</strong>
+						<span id="ability-max_points">
+							{% if character.max_ability_points %}
+								{{ character.max_ability_points }}
+							{% else %}
+								None
+							{% endif %}
+						</span>
+					</div>
+					<div class="card">
+						<strong>
+							Available ability points: 
+						</strong>
+						<span id="ability-remaining_points">
+							{% if character.remaining_ability_points %}
+								{{ character.remaining_ability_points }}
+							{% else %}
+								None
+							{% endif %}
+						</span>
+					</div>
+				</div>
+
+
+
+				<div class="card">
+					{% if ability_list %}
+					<table class="abilities">
+						<thead>
+							<tr>
+								<th>Ability</th>
+								<th>Level</th>
+								<th>Cost per level up<br>1 level / 2 levels</th>
+								<th>Max upgrades per level up</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for ability_key, ability_data in ability_list.items() %}
+							{% set ch_ability = character.abilities[ability_key] %}
+								<tr>
+									<td>
+										{{ ability_data[Strings.names.value] }}
+									</td>
+									<td>
+										{% if ability_data[Strings.Abilities.cost.value]|length > 1 and ability_data[Strings.Abilities.max_upgrades_per_level.value] > 1 %}
+										<button class="add save-prop" data-key="{{ ability_key }}" data-delta="2">+2</button>
+										{% endif %}
+										<button class="add save-prop" data-key="{{ ability_key }}" data-delta="1">+1</button>
+										{% if ch_ability %}
+										<span id="ability-{{ ability_key }}">
+											{{ ch_ability[Strings.Abilities.level.value] }}
+										</span>
+										{% else %}
+										<span id="ability-{{ ability_key }}">
+											0
+										</span>
+										{% endif %}
+										<button class="subtract save-prop" data-key="{{ ability_key }}" data-delta="-1">-1</button>
+										{% if ability_data[Strings.Abilities.cost.value]|length > 1 and ability_data[Strings.Abilities.max_upgrades_per_level.value] > 1 %}
+										<button class="subtract save-prop" data-key="{{ ability_key }}" data-delta="-2">-2</button>
+										{% endif %}
+									</td>
+									<td>
+										{% for cost in ability_data[Strings.Abilities.cost.value] %}
+											{{ cost }} {{" / " if not loop.last }}
+										{% endfor %}
+									</td>
+									<td>
+										{{ ability_data[Strings.Abilities.max_upgrades_per_level.value] }}
+									</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+					{% endif %}
+				</div>
+
+
+
+			</div>
+
+			<div class="card" style="margin-top:50px">
+				<h2 style="margin-top: 5px; margin-bottom: 30px" >Danger Zone</h2>
+				<!-- <div class="card"> -->
+					<div>
+						<form method="post" action="{{ url_for('delete', character_name = character.name) }}" style="display:inline">
+						<button class="danger">Delete character</button>
+						</form>
+					</div>
+				<!-- </div> -->
+			</div>
+		</div>
+	</body>
+</html>

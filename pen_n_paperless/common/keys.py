@@ -5,7 +5,7 @@ from enum import Enum, auto
 # Base class with modified methods for all enums
 class Key(Enum):
     # Implementing these methods allows for calling Key.member instead of Key.member.value
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.value)
     # def __repr__(self):
     #     return str(self.value)
@@ -13,8 +13,11 @@ class Key(Enum):
     # Change the functionality of the auto method
     #   the value will be the name in lowercase as a atring
     @staticmethod
-    def _generate_next_value_(name, start, count, last_values):
+    def _generate_next_value_(name, start, count, last_values) -> str:
         return str(name).lower()
+    
+    def __getitem__(self, index: str):
+        return self.__getitem__(index.upper())
     
     
 
@@ -38,10 +41,15 @@ class Generic(Key):
     PROPERTIES = auto()
     DESCRIPTION = auto()
 
+    CATEGORY = auto()
     NOTES = auto()
     COST = auto()
     WEIGHT = auto()
     NONE = auto()
+
+    TOTAL_POINTS = auto()
+    USED_POINTS = auto()
+    REMAINING_POINTS = auto()
 
     
 # Statistics keys
@@ -50,15 +58,14 @@ class Statistics(Key):
     LEVEL = auto()
     EXPERIENCE = auto()
     HP = auto()
-    # MAX_HP = auto()
+    CURRENT_HP = auto()
+    MAX_HP = auto()
 
 
 # Attribute keys
 class Attributes(Key):
     ATTRIBUTE = auto()
     ATTRIBUTE_BONUS = auto()
-    REMAINING_ATTRIBUTE_POINTS = auto()
-    USED_ATTRIBUTE_POINTS = auto()
 
     ENDURANCE = auto()
     ENDURANCE_BONUS = auto()
@@ -78,6 +85,12 @@ class Armour(Key):
     DEFENSE_BONUS = auto()
     EQUIPPED_ARMOUR = auto()
 
+    WOOL = auto()
+    LEATHER = auto()
+    CHAINMAIL = auto()
+    COMPOSITE = auto()
+    PLATE = auto()
+
 
 # Weapon keys
 class Weapons(Key):
@@ -85,6 +98,27 @@ class Weapons(Key):
     ATTACK_BONUS = auto()
     EQUIPPED_WEAPONS = auto()
     INI_BONUS = auto()
+
+    LONGSWORD = auto()
+    DAGGER = auto()
+    TWO_HANDED_SWORD = auto()
+    FALCATA = auto()
+    EPEE = auto()
+    CUTLAS = auto()
+    DAMASCENE_BLADE = auto()
+    CLAYMORE = auto()
+    HATCHET = auto()
+    BATTLEAXE = auto()
+    THROWING_AXE = auto()
+    JAVELIN = auto()
+    LANCE = auto()
+    PIKE = auto()
+    HALBERD = auto()
+    STAFF = auto()
+    SHORTBOW = auto()
+    LONGBOW = auto()
+    COMPOSITE_BOW = auto()
+    ROUND_SHIELD = auto()
 
 
 # History keys
@@ -107,6 +141,8 @@ class Abilities(Key):
 
 # Tribe keys
 class Tribes(Key):
+    TRIBE = auto()
+
     ELF = auto()
     GNOME = auto()
     HALFELF = auto()
@@ -122,6 +158,8 @@ class Tribes(Key):
 
 # Profession keys
 class Professions(Key):
+    PROFESSION =auto()
+    
     BARD = auto()
     THIEF = auto()
     HERBALIST = auto()

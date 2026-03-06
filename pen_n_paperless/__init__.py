@@ -2,12 +2,14 @@
 
 # Python module imports
 import os
+from pathlib import Path
 import logging
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 # internal module imports
 from .config.general import GeneralConfig
+from .common.pyjs_shared_enums import CommonEnumGenerator
 
 
 # Define database
@@ -60,3 +62,18 @@ def create_app():
         init_db()
 
     return app
+
+
+
+
+def generate_files():
+    python_enum_file = Path(__file__).parent / 'common' / 'keys.py'
+    js_enum_file = Path(__file__).parent / 'frontend' / 'static' / 'js' / 'enums.js'
+
+    with CommonEnumGenerator(   python_file_path=python_enum_file.absolute().as_posix(), 
+                                js_file_path=js_enum_file.absolute().as_posix()
+                            ) as common_enum_generator:
+
+        common_enum_generator.generate()
+    print("Generating files completed.")
+    return

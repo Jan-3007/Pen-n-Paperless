@@ -16,10 +16,10 @@
 
 		<script src="{{ url_for('static', filename='js/enums.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
-		<script src="{{ url_for('static', filename='js/editor.js') }}"></script>
-		<script src="{{ url_for('static', filename='js/editor.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/dropdown.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/avatar.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/character.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/editor.js') }}"></script>
 	</head>
 
 	<!-- the data-... elements are called from js, they are automatically converted to camelCase -->
@@ -113,7 +113,6 @@
 							<div class="dropdown-content" id="listDropdown-tribe">
 								{% for tribe_key in tribe_dict.keys() %}
 								<button class="dropdown-element save-prop" 
-										onclick="closeDropdown()"
 										data-category="{{ keys.Tribes.TRIBE }}" 
 										data-key="{{ tribe_key }}" 
 										data-value="{{ tribe_dict.get(tribe_key) }}">
@@ -171,12 +170,7 @@
 							</button>
 							<div class="dropdown-content" id="listDropdown-specialization">
 								{% for specialization_key in specialization_dict.keys() %}
-								<!-- prevent user from sending a specialization placeholder to the server -->
-								{% if specialization_key in keys.Specializations %}
 								<button class="dropdown-element save-prop" 
-								{% else %}
-								<button class="dropdown-element" 
-								{% endif %}
 										data-category="{{ keys.Specializations.SPECIALIZATION }}" 
 										data-key="{{ specialization_key }}" 
 										data-value="{{ specialization_dict.get(specialization_key) }}">

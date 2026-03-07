@@ -126,21 +126,21 @@ class Specialization(CharacterPropertiesInterface):
 
         return cls._specializations.get(key, {})
         
-    # TODO complete redesign because of level dependent names
+
     @classmethod
     def get_all_names(cls) -> dict:
         specialization_dict = {}
 
         for s_key in cls.get_all():
             properties = cls.get_properties(s_key)
-            name_dict = properties.get(Generic.NAME, {})
+            evolutions = properties.get(keys.EVOLUTION, [])
 
-            if name_dict == {}:
-                logging.warning(f"get_all_names(): get_all() returned the key {s_key}, but get_properties() did not include a value for key {Generic.NAME}")
+            if evolutions == []:
+                logging.warning(f"get_all_names(): get_all() returned the key {s_key}, but get_properties() did not include a value for key {keys.EVOLUTION}")
                 specialization_dict[Generic.NONE] = "No specialization found"
             else:
                 # add entry to dict with specialization key and its display name
-                specialization_dict[s_key] = name_dict.get(GeneralConfig.language(), "")
+                specialization_dict[s_key] = [evo.get(Generic.NAME, {}).get(GeneralConfig.language(), "") for evo in evolutions]
 
         return specialization_dict
     

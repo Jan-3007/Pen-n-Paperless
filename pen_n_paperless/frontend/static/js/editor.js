@@ -20,7 +20,7 @@ async function requestEdit(event){
     const value = btn.getAttribute('data-value');
     if(!category || !key || !value) return;
 
-    const characterName = document.getElementById('character_name').value;
+    const characterName = document.getElementById('character_name').innerHTML;
 
     console.debug(
         '[editor.js] requestEdit -> Server',
@@ -54,7 +54,7 @@ async function requestEdit(event){
         if(dataUpdate && typeof dataUpdate === 'object' && dataUpdate.status === 'success'){
             showToast('Saved','success');
 
-            for (const [categ, data] of Object.entries(object)) {
+            for (const [categ, data] of Object.entries(dataUpdate)) {
                 
                 if(categ === Tribes.TRIBE) {
                     updateTribe(data['value']);
@@ -76,8 +76,22 @@ async function requestEdit(event){
                     );
                 }
             }
+        } else if(dataUpdate && typeof dataUpdate === 'object' && dataUpdate.status === 'warning'){
+            console.debug(
+                '[editor.js] received warning',
+                {
+                    "data": dataUpdate
+                }
+            );
 
         }else{
+            console.debug(
+                '[editor.js] received error',
+                {
+                    "data": dataUpdate
+                }
+            );
+
             showToast('Save failed','error');
         }
 

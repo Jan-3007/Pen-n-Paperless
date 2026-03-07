@@ -245,7 +245,7 @@ class Character(db.Model):
                 success = self._edit_tribe(data_key, data_value)
 
                 data_to_send[key] = {
-                    "key": self.tribe,
+                    "key": self.tribe.value,
                     "value": Tribe.get_name(self.tribe)
                 }
 
@@ -263,9 +263,12 @@ class Character(db.Model):
                 success = self._edit_profession(data_key, data_value)
 
                 data_to_send[key] = {
-                    "key": self.profession,
+                    "key": self.profession.value,
                     "value": Profession.get_name(self.profession)
                 }
+
+                # trigger a page reload
+                data_to_send.update({'reload' : True})
 
             elif key == Specializations.SPECIALIZATION.value:
                 data = received_data.get(key, {})
@@ -281,7 +284,7 @@ class Character(db.Model):
                 success = self._edit_specialization(data_key, data_value)
 
                 data_to_send[key] = {
-                    "key": self.specialization,
+                    "key": self.specialization.value,
                     "value": Specialization.get_name(self.specialization, self.level)
                 }
 

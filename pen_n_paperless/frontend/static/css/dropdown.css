@@ -47,6 +47,7 @@ button.dropbtn:hover {
     width: inherit;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
+    border-radius:6px;
 }
 
 /* Allow showing the dropdown via the JS-added .show class */

@@ -22,6 +22,7 @@ from flask import flash
 # internal imports
 from pen_n_paperless import db
 
+from pen_n_paperless.common.status_codes import StatusCode
 from pen_n_paperless.common.keys import get_enum_values,\
                                         Generic,\
                                         Tribes, \
@@ -217,9 +218,9 @@ class Character(db.Model):
         data_to_send = {}
         # set default values
         data_to_send.setdefault('reload', False)
-        data_to_send.setdefault('status', 'error')
+        data_to_send.setdefault(StatusCode.STATUS.value, StatusCode.ERROR.value)
         
-        success = False
+        status = StatusCode.ERROR
 
         for key in received_data.keys():
             # the key will be the value of the enum entry, see common/keys and common/pyjs_shared_enums
@@ -227,7 +228,7 @@ class Character(db.Model):
             if key == Generic.NOTES.value:
                 new_notes = received_data.get(key, '')
                 self._notes = new_notes
-                success = True
+                status = StatusCode.SUCCESS
                 logging.debug(f'Changed data in notes to "{new_notes[0:10]}..."')
                 # no need to send data back, input field stores the latest data
 
@@ -242,7 +243,7 @@ class Character(db.Model):
                     logging.error(f'key {key} is invalid, exc: {e}')
                     flash(f'Internal error', 'error')
                     break
-                success = self._edit_tribe(data_key, data_value)
+                status = self._edit_tribe(data_key, data_value)
 
                 data_to_send[key] = {
                     "key": self.tribe.value,
@@ -260,7 +261,7 @@ class Character(db.Model):
                     logging.error(f'key {key} is invalid, exc: {e}')
                     flash(f'Internal error', 'error')
                     break
-                success = self._edit_profession(data_key, data_value)
+                status = self._edit_profession(data_key, data_value)
 
                 data_to_send[key] = {
                     "key": self.profession.value,
@@ -281,7 +282,7 @@ class Character(db.Model):
                     logging.error(f'key {key} is invalid, exc: {e}')
                     flash(f'Internal error', 'error')
                     break
-                success = self._edit_specialization(data_key, data_value)
+                status = self._edit_specialization(data_key, data_value)
 
                 data_to_send[key] = {
                     "key": self.specialization.value,
@@ -290,42 +291,43 @@ class Character(db.Model):
 
             else:
                 # stop proccessing as soon as a key cannot be found
-                success = False
+                status = StatusCode.ERROR.value
+
                 logging.error(f'key {key} is invalid')
-                flash(f'Internal error', 'error')
+                flash(f'Internal error', StatusCode.ERROR.value)
                 break
 
 
-        if success == True:
+        if status != StatusCode.ERROR:
             # all data has been processed successfully, commit and overwrite defaults
             db.session.commit()
-            data_to_send.update({'status' : 'success'})
+            data_to_send.update({StatusCode.STATUS.value : str(status)})
 
         return data_to_send
         
 
 
     # private methods
-    def _edit_tribe(self, tribe_key: Tribes, tribe_name: str = '') -> bool:
+    def _edit_tribe(self, tribe_key: Tribes, tribe_name: str = '') -> StatusCode:
 
         if tribe_key not in Tribe.get_all():
             logging.error(f'Tribe key {tribe_key} is invalid')
-            flash(f'Internal error', 'error')
-            return False
+            flash(f'Internal error', StatusCode.ERROR.value)
+            return StatusCode.ERROR
 
         self._tribe = tribe_key
         logging.debug(f'Changed tribe to "{tribe_name if tribe_name else Tribe.get_properties(tribe_key).get(Generic.NAME, 'error')}"')
 
         # _update_attribute_bonuses()
         # _update_defense_bonus()
-        return True
+        return StatusCode.SUCCESS
     
-    def _edit_profession(self, profession_key: Professions, profession_name: str = '') -> bool:
+    def _edit_profession(self, profession_key: Professions, profession_name: str = '') -> StatusCode:
 
         if profession_key not in Profession.get_all():
             logging.error(f'Profession key {profession_key} is invalid')
-            flash(f'Internal error', 'error')
-            return False
+            flash(f'Internal error', StatusCode.ERROR.value)
+            return StatusCode.ERROR
 
         self._profession = profession_key
         # delete specialization if the profession has been changed
@@ -336,21 +338,27 @@ class Character(db.Model):
         # _update_max_hp()
         # _update_attribute_bonuses()
         # _update_defense_bonuses()
-        return True
+        return StatusCode.SUCCESS
 
-    def _edit_specialization(self, specialization_key: Specializations, specialization_name: str = '') -> bool:
+    def _edit_specialization(self, specialization_key: Specializations, specialization_name: str = '') -> StatusCode:
 
         if specialization_key not in Specialization.get_available(self.profession, self.level).keys():
-            logging.error(f'Specialization key {specialization_key} is invalid. Specialization may not be unlocked yet.')
-            flash(f'Internal error', 'error')
-            return False
+            logging.error(f'Specialization key {specialization_key} is invalid')
+            flash(f'Internal error', StatusCode.ERROR.value)
+            return StatusCode.ERROR
+        
+        if specialization_name != '' and specialization_name not in Specialization.get_all_names().keys():
+            # valid key, but name is not valid, send warning but let it pass
+            logging.warning(f'User [{self.id}, {self.name}] tried to set the locked specialization "{specialization_key}"')
+            flash(f'Not available', StatusCode.WARNING.value)
+            return StatusCode.WARNING
 
         self._specialization = specialization_key
         logging.debug(f'Changed specialization to "{specialization_name if specialization_name else Specialization.get_properties(specialization_key).get(Generic.NAME, {}).get(GeneralConfig.language(), 'error')}"')
 
         # _update_attribute_bonuses()
         # _update_defense_bonus()
-        return True
+        return StatusCode.SUCCESS
 # -------------------------------------------------------------------------------
 
 # global helper functions

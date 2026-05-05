@@ -110,11 +110,18 @@ class History(db.Model):
     
     def add_entry(self, value: int, description: str):
 
+        if type(value) is not int:
+            logging.error(f'"{value}" is not an integer. Description: "{description}"')
+            return False
+
         self._entries.append(Entry(value, description))
 
+        print(self._entries)
+
         db.session.commit()
+        print(self._entries)
         flash("New entry added", "success")
-        return
+        return True
     
     def delete_entry(self, id: int) -> bool:
         """
@@ -126,7 +133,13 @@ class History(db.Model):
         :return: True when entry successfully deleted
         :rtype: bool
         """
+
+        if type(id) is not int:
+            logging.error(f'"{id}" is not an integer.')
+            return False
         
+        print(self._entries)
+
         for entry in self._entries:
             if entry._id == id:
                 self._entries.remove(entry)

@@ -15,17 +15,17 @@ def main():
 
     # arguments that don't require the whole app
     if args.generate_only:
-        print("Generating files only")
+        print("Generating files ...")
         generate_files()
         return
 
 
     # start the actual app
     print("Starting up pen-n-paperless!")
-    print("The app is accessible at: 'http://127.0.0.1:5001'")
     app = create_app()
 
     if args.debug:
+        print("The app can be accessed at: 'http://127.0.0.1:5001'")
         app.run(
             debug=True,
             # app can be accessed using 'http://127.0.0.1:5001' or 'localhost:5000' only on your machine (except the network configuration is different)

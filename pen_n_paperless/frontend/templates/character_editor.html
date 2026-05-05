@@ -15,6 +15,7 @@
 		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
 		<script src="{{ url_for('static', filename='js/enums.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/status_codes.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/dropdown.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/avatar.js') }}"></script>
@@ -29,6 +30,8 @@
 		data-edit-character-url="{{ url_for('edit', character_name = character.name) }}" 
 		data-upload-avatar-url="{{ url_for('upload_avatar', character_name = character.name) }}"
 		data-delete-avatar-url="{{ url_for('delete_avatar', character_name = character.name) }}"
+
+		
 		>
 		<div class="container">
 			<div class="card">
@@ -174,7 +177,11 @@
 										data-category="{{ keys.Specializations.SPECIALIZATION }}" 
 										data-key="{{ specialization_key }}" 
 										data-value="{{ specialization_dict.get(specialization_key) }}">
-											{{ specialization_dict.get(specialization_key) }}
+											{% if specialization_dict.get(specialization_key) %}
+												{{ specialization_dict.get(specialization_key) }}
+											{% else %}
+												Not available
+											{% endif %}
 								</button>
 								{% endfor %}
 							</div>
@@ -202,71 +209,96 @@
 										<td>Endurance</td>
 										<td>
 											{% set val_endurance = character.attributes.get(keys.Attributes.ENDURANCE, -1) %}
-											<button class="add save-prop" 
-													data-category=""
-													data-key="{{ keys.Attributes.ENDURANCE }}" 
-													data-value="1">+1</button>
-											<span id="prop-{{ keys.Attributes.ENDURANCE }}">{{ val_endurance }}</span>
 											<button class="subtract save-prop" 
-													data-category=""
+													data-category="{{ keys.Attributes.ATTRIBUTE }}"
 													data-key="{{ keys.Attributes.ENDURANCE }}" 
 													data-value="-1">-1</button>
+											<span id="attr-{{ keys.Attributes.ENDURANCE }}">{{ val_endurance }}</span>
+											<button class="add save-prop" 
+													data-category="{{ keys.Attributes.ATTRIBUTE }}"
+													data-key="{{ keys.Attributes.ENDURANCE }}" 
+													data-value="1">+1</button>
 										</td>
 										<td>
-											{% set val_endurance_bonus = character.attribute_bonuses.get(keys.Attributes.ENDURANCE_BONUS, -1) %}
-											<span id="prop-{{ keys.Attributes.ENDURANCE_BONUS }}">{{ val_endurance_bonus }}</span>
+											{% set endurance_bonus_dict = character.attribute_bonuses.get(keys.Attributes.ENDURANCE_BONUS, {}) %}
+											<span id="attr-{{ keys.Attributes.ENDURANCE_BONUS }}">{{ endurance_bonus_dict.get(keys.Attributes.ENDURANCE.value).get(keys.Generic.VALUE.value) }}</span>
+											<!-- TODO add info button to show the details of the calculation -->
 										</td>
 									</tr>
 									<tr>
 										<td>Strength</td>
 										<td>
 											{% set val_strength = character.attributes.get(keys.Attributes.STRENGTH, -1) %}
-											<button class="add save-prop" data-key="{{ keys.Attributes.STRENGTH }}" data-value="1">+1</button>
-											<span id="prop-{{ keys.Attributes.STRENGTH }}">{{ val_strength }}</span>
-											<button class="subtract save-prop" data-key="{{ keys.Attributes.STRENGTH }}" data-value="-1">-1</button>
+											<button class="subtract save-prop" 
+													data-category="keys.Attributes.ATTRIBUTE"
+													data-key="{{ keys.Attributes.STRENGTH }}" 
+													data-value="-1">-1</button>
+											<span id="attr-{{ keys.Attributes.STRENGTH }}">{{ val_strength }}</span>
+											<button class="add save-prop" 
+													data-category="keys.Attributes.ATTRIBUTE"
+													data-key="{{ keys.Attributes.STRENGTH }}" 
+													data-value="1">+1</button>
 										</td>
 										<td>
 											{% set val_strength_bonus = character.attribute_bonuses.get(keys.Attributes.STRENGTH_BONUS, -1) %}
-											<span id="prop-{{ keys.Attributes.STRENGTH_BONUS }}"> {{ val_strength_bonus }}</span>
+											<span id="attr-{{ keys.Attributes.STRENGTH_BONUS }}"> {{ val_strength_bonus }}</span>
 										</td>
 									</tr>
 									<tr>
 										<td>Dexterity</td>
 										<td>
 											{% set val_dexterity = character.attributes.get(keys.Attributes.DEXTERITY, -1) %}
-											<button class="add save-prop" data-key="{{ keys.Attributes.DEXTERITY }}" data-value="1">+1</button>
-											<span id="prop-{{ keys.Attributes.DEXTERITY }}">{{ val_dexterity }}</span>
-											<button class="subtract save-prop" data-key="{{ keys.Attributes.DEXTERITY }}" data-value="-1">-1</button>
+											<button class="subtract save-prop" 
+													data-category="keys.Attributes.ATTRIBUTE"
+													data-key="{{ keys.Attributes.DEXTERITY }}" 
+													data-value="-1">-1</button>
+											<span id="attr-{{ keys.Attributes.DEXTERITY }}">{{ val_dexterity }}</span>
+											<button class="add save-prop" 
+													data-category="keys.Attributes.ATTRIBUTE"
+													data-key="{{ keys.Attributes.DEXTERITY }}" 
+													data-value="1">+1</button>
 										</td>
 										<td>
 											{% set val_dexterity_bonus = character.attribute_bonuses.get(keys.Attributes.DEXTERITY_BONUS, -1) %}
-											<span id="prop-{{ keys.Attributes.DEXTERITY_BONUS }}"> {{ val_dexterity_bonus }}</span>
+											<span id="attr-{{ keys.Attributes.DEXTERITY_BONUS }}"> {{ val_dexterity_bonus }}</span>
 										</td>
 									</tr>
 									<tr>
 										<td>Intelligence</td>
 										<td>
 											{% set val_intelligence = character.attributes.get(keys.Attributes.INTELLIGENCE, -1) %}
-											<button class="add save-prop" data-key="{{ keys.Attributes.INTELLIGENCE }}" data-value="1">+1</button>
-											<span id="prop-{{ keys.Attributes.INTELLIGENCE }}">{{ val_intelligence }}</span>
-											<button class="subtract save-prop" data-key="{{ keys.Attributes.INTELLIGENCE }}" data-value="-1">-1</button>
+											<button class="subtract save-prop" 
+													data-category="keys.Attributes.ATTRIBUTE"
+													data-key="{{ keys.Attributes.INTELLIGENCE }}" 
+													data-value="-1">-1</button>
+											<span id="attr-{{ keys.Attributes.INTELLIGENCE }}">{{ val_intelligence }}</span>
+											<button class="add save-prop" 
+													data-category="keys.Attributes.ATTRIBUTE"
+													data-key="{{ keys.Attributes.INTELLIGENCE }}" 
+													data-value="1">+1</button>
 										</td>
 										<td>
 											{% set val_intelligence_bonus = character.attribute_bonuses.get(keys.Attributes.INTELLIGENCE_BONUS, -1) %}
-											<span id="prop-{{ keys.Attributes.INTELLIGENCE_BONUS }}"> {{ val_intelligence_bonus }}</span>
+											<span id="attr-{{ keys.Attributes.INTELLIGENCE_BONUS }}"> {{ val_intelligence_bonus }}</span>
 										</td>
 									</tr>
 									<tr>
 										<td>Charisma</td>
 										<td>
 											{% set val_charisma = character.attributes.get(keys.Attributes.CHARISMA, -1) %}
-											<button class="add save-prop" data-key="{{ keys.Attributes.CHARISMA }}" data-value="1">+1</button>
-											<span id="prop-{{ keys.Attributes.CHARISMA }}">{{ val_charisma }}</span>
-											<button class="subtract save-prop" data-key="{{ keys.Attributes.CHARISMA }}" data-value="-1">-1</button>
+											<button class="subtract save-prop" 
+													data-category="keys.Attributes.ATTRIBUTE"
+													data-key="{{ keys.Attributes.CHARISMA }}" 
+													data-value="-1">-1</button>
+											<span id="attr-{{ keys.Attributes.CHARISMA }}">{{ val_charisma }}</span>
+											<button class="add save-prop" 
+													data-category="keys.Attributes.ATTRIBUTE"
+													data-key="{{ keys.Attributes.CHARISMA }}" 
+													data-value="1">+1</button>
 										</td>
 										<td>
 											{% set val_charisma_bonus = character.attribute_bonuses.get(keys.Attributes.CHARISMA_BONUS, -1) %}
-											<span id="prop-{{ keys.Attributes.CHARISMA_BONUS }}"> {{ val_charisma_bonus }}</span>
+											<span id="attr-{{ keys.Attributes.CHARISMA_BONUS }}"> {{ val_charisma_bonus }}</span>
 										</td>
 									</tr>
 								</tbody>
@@ -275,7 +307,7 @@
 										<th>Total</th>
 										<th>
 											{% set val_total_attribute_points = character.attribute_points.get(keys.Generic.TOTAL_POINTS, -1) %}
-											<span id="prop-{{ keys.Generic.TOTAL_POINTS }}"> {{ val_total_attribute_points }}</span>
+											<span id="attr-{{ keys.Generic.TOTAL_POINTS }}"> {{ val_total_attribute_points }}</span>
 										</th>
 										<th></th>
 									</tr>
@@ -283,7 +315,7 @@
 										<th>Remaining</th>
 										<th>
 											{% set val_remaining_attribute_points = character.attribute_points.get(keys.Generic.REMAINING_POINTS, -1) %}
-											<span id="prop-{{ keys.Generic.REMAINING_POINTS }}"> {{ val_remaining_attribute_points }}</span>
+											<span id="attr-{{ keys.Generic.REMAINING_POINTS }}"> {{ val_remaining_attribute_points }}</span>
 										</th>
 										<th></th>
 									</tr>
@@ -314,9 +346,8 @@
 										<td>{{ hp_entry.value }}</td>
 										<td>{{ hp_entry.description }}</td>
 										<td>
-											<button class="danger remove-entry" 
+											<button class="danger history remove-entry" 
 													data-category="{{ keys.History.HP_HISTORY }}" 
-													data-key="{{ keys.History.ENTRY_NUMBER }}"
 													data-value="{{ hp_entry.id }}">Remove</button>
 										</td>
 									</tr>
@@ -337,32 +368,45 @@
 							</tfoot>
 						</table>
 
+
 						<table class="add-entry">
 							<thead>
 								<tr>
-									<th>Add</th>
+									<th>Add New Entry</th>
 									<td></td>
 								</tr>
 							</thead>
 							<tbody>
 								<tr>
 									<td>
-										<textarea id="add-entry-desc-{{ keys.History.HP_HISTORY }}" 
-												rows="1" 
-												placeholder="Description"></textarea>
+										<input 	type="number" defaultValue="0"
+												id="add-entry-value-{{ keys.History.HP_HISTORY }}" 
+												style="margin-top: 4px"
+												placeholder="Value" 
+												required
+												pattern="/^\d+$/">
 									</td>
 									<td>
-										<textarea id="add-entry-value-{{ keys.History.HP_HISTORY }}" 
-												rows="1" 
-												placeholder="Value"></textarea>
+										<input	type="text"
+												id="add-entry-desc-{{ keys.History.HP_HISTORY }}" 
+												style="margin-top: 4px"
+												placeholder="Description"
+												autocomplete="on">
 									</td>
 								</tr>
 							</tbody>
-						</table>	
-						<button class="save" onclick='addEntry("{{ keys.History.HP_HISTORY }}")'>Save</button>
+						</table>
+						<button id="add-hp-history-entry"
+								class="save history"
+								style="margin-top: 4px"
+								data-category="{{ keys.History.HP_HISTORY }}">Save</button>
+
 					</div>
 					{% endif %}
 				</div>
+
+
+
 
 				<h2>Character Experience</h2>
 				<div class="card">
@@ -387,9 +431,8 @@
 									<td>{{ xp_entry.value }}</td>
 									<td>{{ xp_entry.description }}</td>
 									<td>
-										<button class="danger remove-entry" 
+										<button class="danger history remove-entry" 
 												data-category="{{ keys.History.XP_HISTORY }}" 
-												data-key="{{ keys.History.ENTRY_NUMBER }}"
 												data-value="{{ xp_entry.id }}">Remove</button>
 									</td>
 								</tr>
@@ -409,29 +452,39 @@
 							
 						</tfoot>
 					</table>
+
 					<table class="add-entry">
 						<thead>
 							<tr>
-								<th>Add</th>
+								<th>Add New Entry</th>
 								<td></td>
 							</tr>
 						</thead>
 						<tbody>
 							<tr>
 								<td>
-									<textarea id="add-entry-desc-{{ keys.History.XP_HISTORY }}" 
-											rows="1" 
-											placeholder="Description"></textarea>
+									<input	type="number" defaultValue="0"
+											id="add-entry-value-{{ keys.History.XP_HISTORY }}" 
+											style="margin-top: 4px;"
+											placeholder="Value"
+											required
+											pattern="/^\d+$/">
 								</td>
 								<td>
-									<textarea id="add-entry-value-{{ keys.History.XP_HISTORY }}" 
-											rows="1" 
-											placeholder="Value"></textarea>
+									<input	type="text"
+											id="add-entry-desc-{{ keys.History.XP_HISTORY }}" 
+											style="margin-top: 4px;"
+											placeholder="Description"
+											autocomplete="on">
 								</td>
 							</tr>
 						</tbody>
 					</table>	
-					<button class="save" onclick='addEntry("{{ keys.History.XP_HISTORY }}")'>Save</button>
+					<button id="add-xp-history-entry"
+							class="save history"
+							style="margin-top: 4px"
+							data-category="{{ keys.History.XP_HISTORY }}">Save</button>
+
 					{% endif %}
 				</div>
 
@@ -444,13 +497,12 @@
 						<strong>Armour</strong>
 
 						<div class="grid">
-							<!-- {% if character.equipped_armour %} -->
+							{% if character.equipped_armour %}
 
 							{% for idx in range(0, max_armour_sets) %}
 
-								{% set ch_armour_key = character.equipped_armour[idx] %}
-
-								{% if armour_dict.get(ch_armour_key) %}
+								{% if character.equipped_armour[idx] %}
+									{% set ch_armour_key = character.equipped_armour[idx] %}
 									{% set ch_armour_name = armour_dict.get(ch_armour_key) %}
 								{% else %}
 									{% set ch_armour_name = 'None equipped' %}
@@ -461,17 +513,18 @@
 									<button onclick="onDropdownSelect('armour')" 
 											class="dropbtn">{{idx + 1}}: {{ch_armour_name}}</button>
 									<div id="listDropdown-armour" class="dropdown-content">
-										{% for armour_key in armour_dict.keys() %}
-										<button class="dropdown-element save-prop" 
+										{% for armour_key, armour_name in armour_dict.items() %}
+										<button id="equipment-dropdown-element"
+												class="dropdown-element" 
 												data-category="{{ keys.Armour.ARMOUR }}" 
 												data-key="{{ armour_key }}" 
-												data-value="{{ armour_dict.get(armour_name) }}">{{ armour_dict.get(armour_name) }}</button>
+												data-value="{{ armour_name }}">{{ armour_name }}</button>
 										{% endfor %}
 									</div>
 								</div>
 
 							{% endfor %}
-							<!-- {% endif %} -->
+							{% endif %}
 						</div>
 
 					</div>
@@ -481,34 +534,34 @@
 						<strong>Weapons</strong>
 
 							<div class="grid">
-								<!-- {% if character.equipped_weapons %} -->
+								{% if character.equipped_weapons %}
 
 								{% for idx in range(0, max_nb_weapons) %}
 
-									{% set ch_weapon_key = character.equipped_weapons[idx] %}
-
-									{% if weapons_dict.get(ch_weapon_key) %}
+									{% if character.equipped_weapons[idx] %}
+										{% set ch_weapon_key = character.equipped_weapons[idx] %}
 										{% set ch_weapon_name = weapons_dict.get(ch_weapon_key) %}
 									{% else %}			
 										{% set ch_weapon_name = 'None equipped' %}
 									{% endif %}
 
 									<div id="weapon-{{ idx }}" class="dropdown">
-
+										<!-- TODO also send idx to server -->
 										<button onclick="onDropdownSelect('weapon')" 
 												class="dropbtn">{{idx + 1}}: {{ch_weapon_name}}</button>
 										<div id="listDropdown-weapon" class="dropdown-content">
-											{% for weapon_key in weapons_dict.keys() %}
-												<button class="dropdown-element save-prop" 
-														data-category="{{ keys.Weapons.WEAPON }}" 
-														data-value="{{ weapon_key }}" 
-														data-display="{{ weapons_dict.get(weapon_key) }}">{{ weapons_dict.get(weapon_key) }}</button>
+											{% for weapon_key, weapon_name in weapons_dict.items() %}
+											<button id="equipment-dropdown-element"
+													class="dropdown-element" 
+													data-category="{{ keys.Weapons.WEAPON }}" 
+													data-key="{{ weapon_key }}" 
+													data-value="{{ weapon_name }}">{{ weapon_name }}</button>
 											{% endfor %}
 										</div>
 									</div>
 
 								{% endfor %}
-								<!-- {% endif %} -->
+								{% endif %}
 							</div>
 
 					</div>
@@ -547,6 +600,11 @@
 					</div>
 				</div>
 
+				<div class="grid">
+					<div class="card">
+						<h3>Ability 1</h3>
+					</div>
+				</div>
 
 
 				<div class="card">

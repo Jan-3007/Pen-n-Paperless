@@ -10,13 +10,22 @@ docs/
 
 # Avatars
 *.jpg
+*.png
 *.webp
 
-# js enums
+# generated js enums
 enums.js
+status_codes.js
 
 # Log files
 *.log
+
+# Wiki
+wiki
+
+# Notes
+notes
+
 
 
 # --- --- --- --- ---
@@ -42,7 +51,7 @@ pyvenv.cfg
 # --- --- --- --- ---
 # Python packages
 
-# Flask stuff:
+# Flask
 instance/
 .webassets-cache
 

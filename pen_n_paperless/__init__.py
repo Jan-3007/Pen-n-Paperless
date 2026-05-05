@@ -74,6 +74,7 @@ def create_app():
 
 
 def generate_files():
+    # export all keys
     python_enum_file = Path(__file__).parent / 'common' / 'keys.py'
     js_enum_file = Path(__file__).parent / 'frontend' / 'static' / 'js' / 'enums.js'
 
@@ -82,5 +83,16 @@ def generate_files():
                             ) as common_enum_generator:
 
         common_enum_generator.generate()
+
+    # export status codes
+    python_enum_file = Path(__file__).parent / 'common' / 'status_codes.py'
+    js_enum_file = Path(__file__).parent / 'frontend' / 'static' / 'js' / 'status_codes.js'
+
+    with CommonEnumGenerator(   python_file_path=python_enum_file.absolute().as_posix(), 
+                                js_file_path=js_enum_file.absolute().as_posix()
+                            ) as common_enum_generator:
+
+        common_enum_generator.generate()
+
     print("Generating files completed.")
     return

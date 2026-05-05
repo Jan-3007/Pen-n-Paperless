@@ -134,11 +134,9 @@ class Armoury(CharacterPropertiesInterface):
 
 
 
-    # @classmethod
-    # def get_name(cls, armour_key: str) -> str:
-    #     """Get the name of a certain armour in the selected language"""
-    #     name = cls.get_properties(armour_key).get(Generic.NAME, "Empty")
-    #     if isinstance(name, list):
-    #         return name[GameSettings.language()]
-    #     else:
-    #         return name
+    @classmethod
+    def get_name(cls, armour_key) -> str:
+        """Get the name of a certain armour
+        
+        """
+        return cls.get_properties(armour_key).get(Generic.NAME, {}).get(GeneralConfig.language(), "")

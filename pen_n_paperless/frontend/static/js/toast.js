@@ -13,7 +13,10 @@ function showToast(message, kind=''){
     }
     // apply basic config to the toast
     t.textContent = message;
-    t.classList.remove('success','error');
+    for (let status in StatusCode) {
+        t.classList.remove(status);
+    }
+    // t.classList.remove('success', 'warning', 'error');
     if(kind) t.classList.add(kind);
     t.classList.add('show');
     clearTimeout(t._hide);
@@ -42,7 +45,10 @@ async function fetchWithFlashes(url, options){
                 // small delay to allow toasts to display
                 setTimeout(function(){ window.location.reload(); }, 500);
             }
-            return j;
+
+            // remove 'flashed' and 'reload' properties
+            const { flashed, reload, ...unprocessedData } = j;
+            return unprocessedData;
         }
         // non-JSON response: return the Response object so callers can handle it
         return res;

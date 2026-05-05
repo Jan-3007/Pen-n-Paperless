@@ -312,11 +312,9 @@ class Weaponry(CharacterPropertiesInterface):
     
 
 
-    # @classmethod
-    # def get_name(cls, weapon_key: str) -> str:
-    #     """Get the name of a certain weapon in the selected language"""
-    #     name = cls.get_properties(weapon_key).get(Generic.NAME, "Empty")
-    #     if isinstance(name, list):
-    #         return name[GameSettings.language()]
-    #     else:
-    #         return name
+    @classmethod
+    def get_name(cls, weapon_key: str) -> str:
+        """Get the name of a certain weapon
+        
+        """
+        return cls.get_properties(weapon_key).get(Generic.NAME, {}).get(GeneralConfig.language(), "")

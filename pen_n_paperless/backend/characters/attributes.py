@@ -30,6 +30,11 @@ if typing.TYPE_CHECKING:
 
 
 class Attributes(db.Model):
+    """Class managing attributes and attribute bonuses
+
+    The attribute bonus members only store the bonus that can be directly calculated from the attribute.
+
+    """
     __tablename__ = "table_attributes"
     # __table_args__ = (UniqueConstraint("_character_id"),)
 
@@ -124,6 +129,18 @@ class Attributes(db.Model):
 # -------------------------------------------------------------------------------
 
     # public Methods
+    # TODO maybe move to another content class, like tribe, profession and specialization
+    @classmethod
+    def get_name(cls, attr_key: key) -> str:
+        match attr_key:
+            case key.ENDURANCE: return "Endurance"
+            case key.STRENGTH: return "Strength"
+            case key.DEXTERITY: return "Dexterity"
+            case key.INTELLIGENCE: return "Intelligence"
+            case key.CHARISMA: return "Charisma"
+            case _: return "Error"
+
+
     def get_attributes(self) -> dict:
         return {
             key.ENDURANCE: self.endurance,
@@ -134,6 +151,7 @@ class Attributes(db.Model):
         }
     
     def get_attribute_bonuses(self) -> dict:
+        # TODO with for loop and dict comprehension
         return {
             key.ENDURANCE_BONUS: self.endurance_bonus,
             key.STRENGTH_BONUS: self.strength_bonus,
@@ -141,7 +159,7 @@ class Attributes(db.Model):
             key.INTELLIGENCE_BONUS: self.intelligence_bonus,
             key.CHARISMA_BONUS: self.charisma_bonus,
         }
-
+    
     def set_attribute(self, attribute_key: key, value: int) -> bool:
         """
         Update the value of the specified attribute
@@ -149,7 +167,7 @@ class Attributes(db.Model):
         :param self: Description
         :param key: Description
         :type key: key
-        :param value: Description
+        :param value: The absolute value to be set
         :type value: int
         :return: Description
         :rtype: bool
@@ -186,9 +204,49 @@ class Attributes(db.Model):
         flash("Update successful", "success")
         return True
 
+    def modify_attribute(self, attribute_key: key, value: int) -> bool:
+        """
+        Update the value of the specified attribute
+        
+        :param self: Description
+        :param key: Description
+        :type key: key
+        :param value: The relative value to be added
+        :type value: int
+        :return: Description
+        :rtype: bool
+        """
+
+        if type(value) is not int:
+            logging.error(f'"{value}" is not an integer. Cannot set for attribute {attribute_key}')
+            return False
+
+        # get old value
+        old_value = self.get_attributes().get(attribute_key, -1)
+        if old_value < 0:
+            logging.error(f'Failed to retrieve value from "{attribute_key}". Returned {old_value}')
+            flash("Internal error", "error")
+            return False
+        
+        return self.set_attribute(attribute_key, old_value + value)
 
 
+    def convert_key(self, original_key: key) -> key:
 
+        bonus_extension = key.ATTRIBUTE_BONUS.value.removeprefix(key.ATTRIBUTE.value)
+
+        if original_key == key.ATTRIBUTE:
+            return key(original_key.value + bonus_extension)
+        
+        elif original_key == key.ATTRIBUTE_BONUS:
+            return key(original_key.value.removesuffix(bonus_extension))
+
+        else:
+            logging.error(f'Failed to convert "{original_key}"')
+            flash("Internal error", "error")
+            return key.ATTRIBUTE
+        
+    
 # -------------------------------------------------------------------------------
 
     # private Methods
@@ -249,7 +307,7 @@ class Attributes(db.Model):
 
 
 
-    def _update_attribute_bonus(self, attribute_key: key) -> bool:
+    def _update_attribute_bonus(self, attribute_key: key, initial_value: int = 0) -> bool:
         """
         Update the attribute bonus associated with the given attribute.
         
@@ -267,7 +325,7 @@ class Attributes(db.Model):
             return False
 
         # determine bonus value
-        bonus = 0
+        bonus = initial_value
 
         if(attribute_value <= 1):
             bonus = -3

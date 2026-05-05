@@ -1,4 +1,9 @@
 {
     "python.analysis.typeCheckingMode": "standard",
-    "python.analysis.autoImportCompletions": false
+    "python.analysis.autoImportCompletions": false,
+    "python.testing.pytestArgs": [
+        "pen_n_paperless"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }

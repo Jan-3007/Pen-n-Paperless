@@ -18,5 +18,6 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "py-spy>=0.4.1",
     "pytest>=9.0.2",
 ]

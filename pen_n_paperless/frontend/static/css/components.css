@@ -1,14 +1,22 @@
 /* Forms, controls and components */
 
 label{display:block; margin-bottom:6px}
-input[type=text], 
-input[type=file], 
+
+input[type="text"], 
+input[type="number"],
+input[type="file"], 
 textarea{width:100%; padding:8px; border:1px solid #e5e7eb; border-radius:6px}
+
+
+
 
 .controls{display:flex; gap:8px; align-items:center}
 
 .stat{display:flex; gap:8px; align-items:center; justify-content:space-between; padding:8px 0}
 .stat strong{min-width:120px}
+
+
+
 
 
 

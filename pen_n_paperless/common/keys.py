@@ -78,6 +78,27 @@ class Attributes(Key):
     CHARISMA = auto()
     CHARISMA_BONUS = auto()
 
+    def __eq__(self, other: object) -> bool:
+        """Compare specific element against ATTRIBUTE or ATTRIBUTE_BONUS
+        """
+        if not isinstance(other, Attributes):
+            return False
+        
+        other = Attributes(other)
+        
+        bonus_extension = self.ATTRIBUTE_BONUS.value.removeprefix(self.ATTRIBUTE.value)
+        if self.value.endswith(bonus_extension) and other.value.endswith(bonus_extension):
+            # both are an attribute bonus
+            return True
+        elif not self.value.endswith(bonus_extension) and not other.value.endswith(bonus_extension):
+            # both are an attribute
+            return True
+        else:
+            return False
+        
+    def __hash__(self) -> int:
+        return super().__hash__()
+
 
 # Armour keys
 class Armour(Key):

@@ -7,21 +7,20 @@ Big thanks to Sajam!
 Github: https://github.com/Sajam/pyjs_shared_enums
 
 Edit:
-I made some minor changes to adapt it to my version of Python.
+I made some changes to adapt it to my use case and version of Python.
 """
 
 import os
 import ast
-import re
 from optparse import OptionParser
 
 import pen_n_paperless.common.keys as keys
 
+
 BASE_PATH = os.path.normpath(os.path.dirname(__file__))
-ENUM_CLASSES_NAMES = ('Generic', 'Statistics', 'Attributes', 'Armour', 'Weapons', 'History', 'Abilities', 'Tribes', 'Professions', 'Specializations', 'Traits', 'Avatars')
-# ENUM_CLASSES_NAMES = ('Generic',)
-
-
+# use the next two variables if you don't want to convert all enum classes of a Python file
+ENUM_CLASSES_NAMES = ('Generic', 'Statistics', 'Attributes')
+USE_ENUM_CLASSES_NAMES = False
 
 
 class AstHelpers(object):
@@ -49,7 +48,10 @@ class AstHelpers(object):
             if isinstance(n, ast.ClassDef):
                 classes.append(n)
 
-        return filter(lambda py_class: any([py_class.name in class_name_or_names]), classes)
+        if USE_ENUM_CLASSES_NAMES:
+            return filter(lambda py_class: any([py_class.name in class_name_or_names]), classes)
+
+        return classes
 
     @staticmethod
     def get_assignments(node):

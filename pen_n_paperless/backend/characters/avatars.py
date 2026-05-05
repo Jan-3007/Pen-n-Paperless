@@ -19,6 +19,8 @@ from PIL.ImageFile import ImageFile
 # internal imports
 from pen_n_paperless import avatars_path
 
+from pen_n_paperless.common.status_codes import StatusCode
+
 from pen_n_paperless.config.general import GeneralConfig
 
 
@@ -84,6 +86,7 @@ class Avatar():
                 # return (avatars_path / filename).as_posix()
         
         logging.warning(f'Search for avatar for character id "{self._character_id}" with name "{self._character_name}" did not yield a match.')
+        # missing/empty avatar is indicated with '#'
         return '#'
 
 
@@ -94,7 +97,7 @@ class Avatar():
 
 
 
-    def save(self, new_avatar_file: FileStorage) -> bool:
+    def save(self, new_avatar_file: FileStorage) -> StatusCode:
 
         # remove old avatars for this character
         self.delete()
@@ -103,20 +106,20 @@ class Avatar():
         filename = new_avatar_file.filename
         if filename is None:
             logging.error(f"Given filename is '{filename}'")
-            flash('No file uploaded', 'error')
-            return False
+            flash('No file uploaded', StatusCode.ERROR.value)
+            return StatusCode.ERROR
         
         success = self._set_extension(Path(filename).suffix.lower())
         if not success:
-            return False
+            return StatusCode.ERROR
 
         # process image
         try:
             img = Image.open(new_avatar_file.stream)
         except Exception:
             logging.error(f"Opening image for processing failed")
-            flash('Invalid image file', 'error')
-            return False
+            flash('Invalid image file', StatusCode.ERROR.value)
+            return StatusCode.ERROR
 
         # resize to max dimensions
         img.thumbnail(GeneralConfig.avatar_size(), Image.Resampling.LANCZOS)
@@ -141,7 +144,7 @@ class Avatar():
         return True
 
 
-    def _convert_and_store(self, img: ImageFile) -> bool:
+    def _convert_and_store(self, img: ImageFile) -> StatusCode:
 
         try:
             if self._extension in ('.jpg', '.jpeg'):
@@ -155,8 +158,8 @@ class Avatar():
                 img.save(self.file_path.as_posix() + self._extension, format='PNG', optimize=True)
         except Exception:
             logging.error(f'Failed to process image as jpg or png')
-            flash('Failed to process image', 'error')
-            return False
+            flash('Failed to process image', StatusCode.ERROR.value)
+            return StatusCode.ERROR
         
         # also create a WebP version for smaller delivery
         try:
@@ -169,12 +172,13 @@ class Avatar():
         except Exception:
             # not fatal — continue but warn
             logging.warning(f'Avatar has been saved. Failed to create webp version.')
-            flash('Avatar uploaded but failed to create WebP version', 'warning')
+            flash('Avatar uploaded but failed to create WebP version', StatusCode.WARNING.value)
+            return StatusCode.WARNING
 
         # storing avatar successful
         logging.debug(f'Avatar has been saved.')
-        flash('Avatar uploaded', 'success')
-        return True
+        flash('Avatar uploaded', StatusCode.SUCCESS.value)
+        return StatusCode.SUCCESS
 
 
 

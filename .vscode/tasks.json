@@ -1,0 +1,57 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+
+        {
+            "label": "Generate Files",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "type": "shell",
+            "windows": {
+                "command": "uv run main.py -g"
+            },
+            "presentation": {
+                "echo": false,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false
+            }
+        },
+
+
+        {
+            "label": "Run app",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "type": "shell",
+            "windows": {
+                "command": "uv run main.py -d"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+
+        {
+            "label": "Refresh & Run",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "dependsOn": ["Generate Files", "Run app"],
+            "dependsOrder": "sequence"
+        }
+
+    ]
+}

@@ -2,6 +2,8 @@
 # Python module imports
 import logging
 
+from typing import Any
+
 # internal imports
 #   main package
 from pen_n_paperless.common.keys import Specializations as keys
@@ -189,7 +191,17 @@ class Specialization(CharacterPropertiesInterface):
         return name
 
 
+    @classmethod
+    def get_attribute_bonus(cls, specialization_key: keys, character_level: int, attribute_bonus_key: Attributes, default_value: int = 0) -> int:
+        bonus = default_value
 
+        evolution_list: list = cls.get_properties(specialization_key).get(keys.EVOLUTION, [])
+        if evolution_list:
+            for evolution in evolution_list:
+                if character_level >= evolution.get(Statistics.LEVEL):
+                    bonus += evolution.get(attribute_bonus_key, 0)
+
+        return bonus
 
 
     # @classmethod
